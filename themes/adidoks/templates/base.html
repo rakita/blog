@@ -35,7 +35,9 @@
     {{ macros_header::header(current_section="/") }}
   {% endblock header %}
 
-  {% block content %}{% endblock content %}
+  <div class="main">
+    {% block content %}{% endblock content %}
+  </div>
 
   {% block footer %}
     {{ macros_footer::footer() }}
