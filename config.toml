@@ -1,5 +1,5 @@
 # The URL the site will be built for
-base_url = "https://adidoks.netlify.com"
+base_url = "https://rakita.github.io/blog/"
 title = "draganrakita"
 description = "Blog about core blockchain tech (mostly Ethereum) and rust"
 

@@ -1,36 +1,36 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
-        <loc>https://adidoks.netlify.com/</loc>
+        <loc>https://rakita.github.io/blog/</loc>
     </url>
     <url>
-        <loc>https://adidoks.netlify.com/authors/</loc>
+        <loc>https://rakita.github.io/blog/authors/</loc>
     </url>
     <url>
-        <loc>https://adidoks.netlify.com/authors/draganrakita/</loc>
+        <loc>https://rakita.github.io/blog/authors/draganrakita/</loc>
         <lastmod>2021-04-01T08:50:45+00:00</lastmod>
     </url>
     <url>
-        <loc>https://adidoks.netlify.com/authors/public/</loc>
+        <loc>https://rakita.github.io/blog/authors/public/</loc>
     </url>
     <url>
-        <loc>https://adidoks.netlify.com/authors/rustaceans/</loc>
+        <loc>https://rakita.github.io/blog/authors/rustaceans/</loc>
     </url>
     <url>
-        <loc>https://adidoks.netlify.com/blog/</loc>
+        <loc>https://rakita.github.io/blog/blog/</loc>
     </url>
     <url>
-        <loc>https://adidoks.netlify.com/blog/2d-transformations/</loc>
+        <loc>https://rakita.github.io/blog/blog/2d-transformations/</loc>
         <lastmod>2020-04-20T09:19:42+00:00</lastmod>
     </url>
     <url>
-        <loc>https://adidoks.netlify.com/blog/hello-world/</loc>
+        <loc>https://rakita.github.io/blog/blog/hello-world/</loc>
         <lastmod>2021-05-01T09:19:42+00:00</lastmod>
     </url>
     <url>
-        <loc>https://adidoks.netlify.com/blog/page/1/</loc>
+        <loc>https://rakita.github.io/blog/blog/page/1/</loc>
     </url>
     <url>
-        <loc>https://adidoks.netlify.com/privacy-policy/</loc>
+        <loc>https://rakita.github.io/blog/privacy-policy/</loc>
     </url>
 </urlset>
