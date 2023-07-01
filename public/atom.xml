@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>draganrakita</title>
+    <subtitle>Blog about core blockchain tech (mostly Ethereum) and rust</subtitle>
+    <link href="https://adidoks.netlify.com/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://adidoks.netlify.com"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2022-04-20T09:19:42+00:00</updated>
+    <id>https://adidoks.netlify.com/atom.xml</id>
+    <entry xml:lang="en">
+        <title>2D UI beginner guide. Learn to rotate&#x2F;translate&#x2F;scale</title>
+        <published>2022-04-20T09:19:42+00:00</published>
+        <updated>2020-04-20T09:19:42+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://adidoks.netlify.com/blog/2d-transformations/" type="text/html"/>
+        <id>https://adidoks.netlify.com/blog/2d-transformations/</id>
+        
+        <content type="html">&lt;p&gt;Recently I had pleasure to make UI for standard rotate&#x2F;scale&#x2F;translate controls on element with some bounding box. I told myself: great! this will be easy! Lets google it, make some matrices and this will be quickly finished... must say that it took me a bit longer. Internet didn&#x27;t help me with comprehensive solution or guide, I needed to stitch stuff together, and at the end of my frustration I got inspired to write this.&lt;&#x2F;p&gt;
+&lt;p&gt;I will give small intro about rotation and translation because they can be easily implemented and will focus my attention to scaling that made me warm around my hearth (or maybe that was my frustration). At the end you can find TLDR section with aggregated functions that we call.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;transformations&quot;&gt;Transformations&lt;&#x2F;h1&gt;
+&lt;p&gt;Transformation for 2D is constituted of tree things: Rotation, Scaling and Translation and all three things can be represented with one 2x3 matrix (but because of conformity that matrix multiplication give us we add some zero padding and use 3x3). When thinking about matrix most of times I see only a black box, nothing more, I know what I can do with them, and avoid manually setting things. Most important things that we need to take care when matrixing is the order on how we do transformation, it matters, &lt;code&gt;Mfirst*Msecond&lt;&#x2F;code&gt; is not same as &lt;code&gt;Msecond*Mfirst&lt;&#x2F;code&gt; and it depends if we are using row or column major matrices.&lt;&#x2F;p&gt;
+&lt;p&gt;Some info on our setup. Our original element (before transformations), has some size &lt;code&gt;original_size&lt;&#x2F;code&gt;, it is rectangular shape (or his bounding box is), it lies in first quadrant with starting position at coordinate beginning. And we are using row major order matrices (This means order of multiplication of matrices is from left to right &lt;code&gt;Mfirst*Msecond&lt;&#x2F;code&gt;) additionally, we are using these points:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ref_point&lt;&#x2F;code&gt;: point from where transformation is started for rotation&#x2F;scale this is corner that we selected, for translation this is point where user clicked and started to drag our element.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;current_point&lt;&#x2F;code&gt;: current mouse point, it is point where we want to rotate&#x2F;scale&#x2F;translate&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;M&lt;&#x2F;code&gt; : transformation matrix that was already applied on our element.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;anchor_point&lt;&#x2F;code&gt;: other side from &lt;code&gt;ref_point&lt;&#x2F;code&gt;, (opposite corner or side). Needed for scaling.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;center_point&lt;&#x2F;code&gt; : &lt;code&gt;ref_point-anchor_point&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;original_size&lt;&#x2F;code&gt;: Original size of our element (For some systems, element can be normalized to (1,1), but for this example I think it is better to show how we are effected if there is size).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Okay, lets get started from easy to hard:&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;translation&quot;&gt;Translation&lt;&#x2F;h2&gt;
+&lt;p&gt;Translation is most simple of them all, it moves point by specified vector, and nothing more. It is used in tandem with rotation or scaling to center already moved&#x2F;rotated element, but this will be explained in due time. For our UI you take point when mouse is clicked &lt;code&gt;ref_point&lt;&#x2F;code&gt;. And take current point where mouse moved &lt;code&gt;current_point&lt;&#x2F;code&gt;. get diff and create translation matrix as this &lt;code&gt;M=M*translation(current_point-ref_point)&lt;&#x2F;code&gt; and voila, we are done.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;rotation&quot;&gt;Rotation&lt;&#x2F;h2&gt;
+&lt;p&gt;Rotation is little bit more complex (it has little bit more to do) but in same rank as translation. We need reference point &lt;code&gt;ref_point&lt;&#x2F;code&gt; for selected element. Rotation is usually, not to say always, done around element center, for this we need &lt;code&gt;center_point&lt;&#x2F;code&gt;. And lastly we have &lt;code&gt;current_point&lt;&#x2F;code&gt;. As you can guest we need to find the angle between these two vectors &lt;code&gt;x=ref_point-center_point&lt;&#x2F;code&gt; and &lt;code&gt;y=current_point-center_point&lt;&#x2F;code&gt;. After consulting internet we get this equation:&lt;code&gt;angle = atan2(norm(cross(x,y)), dot(x,y))&lt;&#x2F;code&gt;. With angle found we can call function for creating matrix, something like &lt;code&gt;R=rotation(angle)&lt;&#x2F;code&gt;. Appending &lt;code&gt;R&lt;&#x2F;code&gt; to transformation matrix &lt;code&gt;M&lt;&#x2F;code&gt; is done with this simple but very used and important trick: We create another matrix of translation from elements center &lt;code&gt;T=translation(center_point)&lt;&#x2F;code&gt;, and it&#x27;s inverse&lt;code&gt;Tinv = inverse(T)&lt;&#x2F;code&gt;. We get matrix that we can use to append transformation to already present points &lt;code&gt;Ra = Tinv*R*T&lt;&#x2F;code&gt; and final transformation is &lt;code&gt;M=M*Ra&lt;&#x2F;code&gt;. Basically (with &lt;code&gt;Tinv&lt;&#x2F;code&gt; we just nullify translation, we then rotate our element around center and apply T to put it back into old position).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;scale&quot;&gt;Scale&lt;&#x2F;h2&gt;
+&lt;p&gt;And we come to scaling, it is best part of this post (it has pictures) :D. We will gradually introducing few things that needs to be done in scaling, we will see how we handle rotation, and shift controls (shift is usually used for aspect ration lock).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;adidoks.netlify.com&#x2F;blog&#x2F;2d-transformations&#x2F;.&#x2F;naive_scale.png&quot; alt=&quot;Naive Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Nice, lets start with basic example where our element is not rotated or translated and we just want to scale it. We will use &lt;code&gt;ref_point&lt;&#x2F;code&gt; (corner or side usually), and its &lt;code&gt;anchor_point&lt;&#x2F;code&gt; and of course we will need &lt;code&gt;current_point&lt;&#x2F;code&gt; to tell us where we want to scale to. We calculate &lt;code&gt;diff=current_point-anchor_point&lt;&#x2F;code&gt;, get scale as &lt;code&gt;s=scale(diff&#x2F;element_size)&lt;&#x2F;code&gt; and we are done, we have scale matrix that can add to our transformation.&lt;&#x2F;p&gt;
+&lt;p&gt;Okay, lets now look on example where we want to take top left corner &lt;code&gt;ref_point&lt;&#x2F;code&gt; ( you can follow picture below), in that case our &lt;code&gt;anchor_point&lt;&#x2F;code&gt; is positioned at bottom and if we want to scale it properly, to top and left. First difference from previous example is that we will need to move our object so that &lt;code&gt;anchor_point&lt;&#x2F;code&gt; is in &lt;code&gt;(0.0)&lt;&#x2F;code&gt; coordinate! We still need &lt;code&gt;diff&lt;&#x2F;code&gt; and we are calculating it same as before, but because now our axis are flipped, this is second difference, we need to reverse sign of &lt;code&gt;diff_new=Vector(-diff.x,-diff.y)&lt;&#x2F;code&gt;. Note, reversing &lt;code&gt;y&lt;&#x2F;code&gt; is needed for top side &lt;code&gt;ref_point&lt;&#x2F;code&gt; and reversing &lt;code&gt;x&lt;&#x2F;code&gt; for left side &lt;code&gt;ref_point&lt;&#x2F;code&gt;. We get scale as &lt;code&gt;s=scale(diff_new&#x2F;element_size)&lt;&#x2F;code&gt; . And final third difference from previous example is that after all this we need to take translation of anchor &lt;code&gt;T=translate(anchor_point)&lt;&#x2F;code&gt;, calculate inverse &lt;code&gt;Tinv=inverse(T)&lt;&#x2F;code&gt; and bind it all together (from left to right) &lt;code&gt;S=T*s*Tin&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;adidoks.netlify.com&#x2F;blog&#x2F;2d-transformations&#x2F;.&#x2F;scale.png&quot; alt=&quot;Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;As you can see diff vector is oriented to negative in reference to our axis, this is reason why we need to flip it, if we didn&#x27;t do flipping you would get small scale when moving away from top left corner.&lt;&#x2F;p&gt;
+&lt;p&gt;This will all work just fine if element is not in any way rotated (Yey rotation!), with rotation we are now in bind how to calculate our diff and extract scale information. But, don&#x27;t despair, we can use same trick as we did with rotation in a way that we will take &lt;code&gt;current_position&lt;&#x2F;code&gt; and inverse of current transformation matrix &lt;code&gt;Minv = inverse(M)&lt;&#x2F;code&gt; and get &lt;code&gt;relative_position=Minv*current_position&lt;&#x2F;code&gt;. Relative position now presents point relative to our &lt;strong&gt;original&lt;&#x2F;strong&gt; element. We get corner of original element as: &lt;code&gt;original_anchor_point=original_corners[handler_id]&lt;&#x2F;code&gt; (take care to select correct corner, it is probably jumbled up with rotation, I had something like &lt;code&gt;handler_id&lt;&#x2F;code&gt; to help me with that) and do same as we did in our last example, calculate diff as &lt;code&gt;diff=relative_position-original_corners[handler_id]&lt;&#x2F;code&gt;, and if needed invert its axis. Calculate scale as &lt;code&gt;s=scale(diff_new&#x2F;element_original_size)&lt;&#x2F;code&gt; and now similarly as previous scale example we need to move our original element to anchor before we do scaling, bear in mind that that translation represent anchor when our element is &lt;strong&gt;not&lt;&#x2F;strong&gt; transformation. We get &lt;code&gt;T=translate(original_anchor_point)&lt;&#x2F;code&gt; and its inverse &lt;code&gt;Tinv&lt;&#x2F;code&gt; and we get &lt;code&gt;S=T*s*Tinv&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;That&#x27;s great, but how to append scale in current matrix, when scale is something that is done before rotation and translation? We could always prepend scale to &lt;code&gt;M&lt;&#x2F;code&gt;, and this is only way to properly add scale, mostly because we are using &lt;code&gt;S*R*T&lt;&#x2F;code&gt; order. But how to get matrix to apply directly on already transformed points? Hah, just take &lt;code&gt;Minv = inverse(M)&lt;&#x2F;code&gt; and get transformation that we can append on present points as &lt;code&gt;Sa=Minv*S*M&lt;&#x2F;code&gt;, and final matrix is &lt;code&gt;M=M*Sa&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shift-scale&quot;&gt;Shift scale&lt;&#x2F;h2&gt;
+&lt;p&gt;Shift scale is scaling where aspect ration is not changed. This means that scale on both axis is equal and we need to choose which axis orientation we will take as primary. We could make it simple and depending on which corner_id is selected that take modulo of two and chose x or y scale, this will work but will be unintuitive. For better solution where depending on position of mouse relative to diagonal of element we will get smother transition between x and y orientation. See picture below:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;adidoks.netlify.com&#x2F;blog&#x2F;2d-transformations&#x2F;.&#x2F;shyft_scale.png&quot; alt=&quot;Naive Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;With transparent colors we can see zones where we want to take only &lt;code&gt;x&lt;&#x2F;code&gt; ( blue color) or take only &lt;code&gt;y&lt;&#x2F;code&gt; (marked with red). As noticeable our object is in original position that means our &lt;code&gt;original_points&lt;&#x2F;code&gt; is calculated same as in example with rotated object. Slope of diagonals that make these zones are calculated from &lt;code&gt;original_size&lt;&#x2F;code&gt; with equation &lt;code&gt;line_slope = original_size.y&#x2F;original_size.x&lt;&#x2F;code&gt; . for second diagonal it is enough to just flip sign and we will get second slope. what we want to check is if point is in blue or red space and we can do that following if statement: (for abbreviate: &lt;code&gt;op&lt;&#x2F;code&gt; is &lt;code&gt;original_point&lt;&#x2F;code&gt; , &lt;code&gt;ls&lt;&#x2F;code&gt; is &lt;code&gt;line_slope&lt;&#x2F;code&gt; ): &lt;code&gt;(op.y &amp;lt; ls**op.x &amp;amp;&amp;amp; op.y &amp;gt; -ls**op.x) || (op.y &amp;gt; op.x**ls &amp;amp;&amp;amp; op.y &amp;lt; -ls**op.x)&lt;&#x2F;code&gt;, and if this if statement is true do &lt;code&gt;scale.y=scale.x&lt;&#x2F;code&gt; if it is false do opposite. And lastly don&#x27;t forget that when you are overriding one scale to not override its sign, in example from picture we are taking &lt;code&gt;y&lt;&#x2F;code&gt; scale and overriding &lt;code&gt;x&lt;&#x2F;code&gt; scale but we need to preserve &lt;code&gt;x&lt;&#x2F;code&gt; sign to properly scale our element &lt;code&gt;x=sign(x)*abs(y)&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;tldr&quot;&gt;TLDR&lt;&#x2F;h2&gt;
+&lt;p&gt;Summary of functions that were called throughout the text:&lt;&#x2F;p&gt;
+&lt;p&gt;Translation:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;M = M*translation(current_point-ref_point)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Rotation:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;text&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-text &quot;&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&lt;span&gt;crp  =ref_point - center_point
+&lt;&#x2F;span&gt;&lt;span&gt;ccp = current_point - center_point
+&lt;&#x2F;span&gt;&lt;span&gt;angle = atan2(norm(cross(crp,ccp)), dot(crp,ccp))
+&lt;&#x2F;span&gt;&lt;span&gt;R = rotate(angle)
+&lt;&#x2F;span&gt;&lt;span&gt;T = translation(center_point)
+&lt;&#x2F;span&gt;&lt;span&gt;Tinv = inverse(T)
+&lt;&#x2F;span&gt;&lt;span&gt;Ra = Tinv*R*T	&#x2F;&#x2F;diff that can be used to apply to already transformed points
+&lt;&#x2F;span&gt;&lt;span&gt;M = M*Ra
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Scale:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;dwda&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-dwda &quot;&gt;&lt;code class=&quot;language-dwda&quot; data-lang=&quot;dwda&quot;&gt;&lt;span&gt;Minv = inverse(M)
+&lt;&#x2F;span&gt;&lt;span&gt;relative_position = Minv * current_position
+&lt;&#x2F;span&gt;&lt;span&gt;original_anchor_point = original_corners[handler_id]
+&lt;&#x2F;span&gt;&lt;span&gt;diff = relative_position - original_anchor_point
+&lt;&#x2F;span&gt;&lt;span&gt;s = scale(diff&#x2F;element_original_size)
+&lt;&#x2F;span&gt;&lt;span&gt;T = translate(original_anchor_point)
+&lt;&#x2F;span&gt;&lt;span&gt;Tinv = inverse(T)
+&lt;&#x2F;span&gt;&lt;span&gt;S = T*s*Tinv
+&lt;&#x2F;span&gt;&lt;span&gt;Sa = Minv*S*M	&#x2F;&#x2F;diff that can be used to apply to already transformed points
+&lt;&#x2F;span&gt;&lt;span&gt;M=M*Sa
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Shift scale:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;dwda&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-dwda &quot;&gt;&lt;code class=&quot;language-dwda&quot; data-lang=&quot;dwda&quot;&gt;&lt;span&gt;scale = (x,y)
+&lt;&#x2F;span&gt;&lt;span&gt;line_slope = original_size.y&#x2F;original_size.x
+&lt;&#x2F;span&gt;&lt;span&gt;if (op.y &amp;lt; ls**op.x &amp;amp;&amp;amp; op.y &amp;gt; -ls**op.x) || (op.y &amp;gt; op.x**ls &amp;amp;&amp;amp; op.y &amp;lt; -ls**op.x) {
+&lt;&#x2F;span&gt;&lt;span&gt;	scale.y = x=sign(y)*abs(x)
+&lt;&#x2F;span&gt;&lt;span&gt;} else {
+&lt;&#x2F;span&gt;&lt;span&gt;	scale.x x=sign(x)*abs(y)
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Hello World</title>
+        <published>2021-05-01T09:19:42+00:00</published>
+        <updated>2021-05-01T09:19:42+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://adidoks.netlify.com/blog/hello-world/" type="text/html"/>
+        <id>https://adidoks.netlify.com/blog/hello-world/</id>
+        
+        <content type="html">&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; This is a comment, and is ignored by the compiler
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; This is the main function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Statements here are executed when the compiled binary is called
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Print text to the console
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Hello World!&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;println!&lt;&#x2F;code&gt; is a macro that prints text to the console.&lt;&#x2F;p&gt;
+&lt;p&gt;A binary can be generated using the Rust compiler: &lt;code&gt;rustc&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; rustc hello.rs
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;rustc&lt;&#x2F;code&gt; will produce a &lt;code&gt;hello&lt;&#x2F;code&gt; binary that can be executed.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;hello
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Hello&lt;&#x2F;span&gt;&lt;span&gt; World!
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Aaran Xu</title>
+        <published>2021-04-01T08:50:45+00:00</published>
+        <updated>2021-04-01T08:50:45+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://adidoks.netlify.com/authors/aaran-xu/" type="text/html"/>
+        <id>https://adidoks.netlify.com/authors/aaran-xu/</id>
+        
+        <content type="html">&lt;p&gt;Creator of &lt;strong&gt;AdiDoks&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;aaranxu&quot;&gt;@aaranxu&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>

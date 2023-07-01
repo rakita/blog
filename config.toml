@@ -1,7 +1,7 @@
 # The URL the site will be built for
 base_url = "https://adidoks.netlify.com"
 title = "draganrakita"
-description = "AdiDoks is a Zola theme helping you build modern documentation websites, which is a port of the Hugo theme Doks for Zola."
+description = "Blog about core blockchain tech (mostly Ethereum) and rust"
 
 # The site theme to use.
 theme = "adidoks"
@@ -70,8 +70,8 @@ timezone = "CET"
 
 # Edit page on reposity or not
 edit_page = false
-docs_repo = "https://github.com/aaranxu/adidoks"
-repo_branch = "main"
+#docs_repo = "https://github.com/aaranxu/adidoks"
+#repo_branch = "main"
 
 ## Math settings
 # options: true, false. Enable math support globally,
