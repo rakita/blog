@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
+    <title>draganrakita</title>
+    <subtitle>Blog about core blockchain tech (mostly Ethereum) and rust</subtitle>
+    <link href="https://rakita.github.io/blog/atom.xml" rel="self" type="application/atom+xml"/>
+    <link href="https://rakita.github.io/blog/"/>
+    <generator uri="https://www.getzola.org/">Zola</generator>
+    <updated>2023-07-09T22:00:00+00:00</updated>
+    <id>https://rakita.github.io/blog/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Parallel EVM claim</title>
+        <published>2023-07-09T22:00:00+00:00</published>
+        <updated>2023-07-09T22:00:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rakita.github.io/blog/blog/parallel-evm-claim/" type="text/html"/>
+        <id>https://rakita.github.io/blog/blog/parallel-evm-claim/</id>
+        
+        <content type="html">&lt;p&gt;This paper is not what you would expect, it is not about how to find the order and dependencies of transaction execution, as there are already a few approaches to this, first can be done with access lists (UTXO, Solana) and the main paper for the second approach is to brute force it with probabilistic execution aka &lt;a href=&quot;https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2203.06871&quot;&gt;Block-STM&lt;&#x2F;a&gt; pioneered by Nova&#x2F;Aptos, and some EVM type blockchain emulated this and gained good performance boost (&lt;a href=&quot;https:&#x2F;&#x2F;polygon.technology&#x2F;blog&#x2F;innovating-the-main-chain-a-polygon-pos-study-in-parallelization&quot;&gt;Polygon PoS&lt;&#x2F;a&gt;, &lt;a href=&quot;https:&#x2F;&#x2F;www.bnbchain.org&#x2F;tr&#x2F;blog&#x2F;new-milestone-the-implementation-of-parallel-evm-2-0&#x2F;&quot;&gt;Binance Chain&lt;&#x2F;a&gt; both got similar performance).&lt;&#x2F;p&gt;
+&lt;p&gt;The idea is for the builder to (somehow) find the transactions that can be done in parallel (the great thing about this is that this can be considered as a black box and can evolve on its own) and share that claim in a form of the transaction &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Directed_acyclic_graph&quot;&gt;DAG&lt;&#x2F;a&gt; to other peers&#x2F;validators, the builder will be rewarded for doing that correctly. And verifier needs to execute those transactions in parallel following that DAG and &lt;strong&gt;verify&lt;&#x2F;strong&gt; the integrity of that claim. We will talk about how to verify this claim (Split of builder and verifier in imho is a very powerful idea that is a little bit undervalued allows us cleaner system modelling).&lt;&#x2F;p&gt;
+&lt;p&gt;Until now I didn&#x27;t find anything related to this and the topic seems a lot more interesting to explore. You don&#x27;t need to increase your transaction size with an access list and you don&#x27;t need to do expensive probabilistic execution (at least not for a lot of nodes), so verifiers have smaller work that they need to do but still fully consistently verify execution. And there is an additional benefit for archive sync that I will talk about later.&lt;&#x2F;p&gt;
+&lt;p&gt;Parallel claim verification creates a potential path to introduce parallel execution inside Ethereum as the focus would be not on finding parallel tx but just on making sure that there are no inconsistencies when given tx are run in parallel. This path is long and requires more research to fully comprehend the change. As this topic is complex I will introduce a few simple examples and slowly build it up to encompass a working solution. But even with that, there are still a lot of pending topics that need to be addressed for this to become integrated inside protocol (parallel gas aka multidimensional gas accounting for example).&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;algorith-explained&quot;&gt;Algorith explained&lt;&#x2F;h1&gt;
+&lt;p&gt;All examples start from the point that we received a DAG of transaction and the builder claims that transaction can be done in parallel. We want to execute those transactions in parallel and be sure that the claim is correct and that there are no inconsistencies (data races) that can happen.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;example-1-simple-two-parallel-transactions&quot;&gt;Example 1: simple two parallel transactions&lt;&#x2F;h3&gt;
+&lt;p&gt;We have two transactions that read&#x2F;write to the &lt;strong&gt;same&lt;&#x2F;strong&gt; state (there is only one state that all of them share) and the update to that state is atomic. The example here is very simple but it allows us to set up some groundwork and initial ideas of what is checked.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp&quot;&gt;Mermaid graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;parallel_evm_claim&#x2F;example_2tx.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;For the sake of explaining we are simplifying state and seeing it as a list of accounts, these &amp;quot;accounts&amp;quot; can be a balance&#x2F;nonce&#x2F;code hash(code)&#x2F;storage slot, it is just easier to reason and think about in simpler form.&lt;&#x2F;p&gt;
+&lt;p&gt;Additionally, we should consider both reads and writes of accounts as the same thing. This can be explored as a follow-up but for the first iteration, it is easier to omit this distinction. So this means that the transaction touched state consists of both reads and writes that this transaction did. And with this, having an account read from two different parallel transactions is considered invalid.&lt;&#x2F;p&gt;
+&lt;p&gt;Now, the idea here is that on every access of an account (read or write) to mark that account in the state as accessed by that transaction. This means that if account &lt;code&gt;0x01&lt;&#x2F;code&gt; is accessed by &lt;code&gt;tx1&lt;&#x2F;code&gt; it will be marked as such and if &lt;code&gt;tx2&lt;&#x2F;code&gt; tries to access account &lt;code&gt;0x1&lt;&#x2F;code&gt; we will notice that account is already marked and see that there is inconsistency and data race in place.&lt;&#x2F;p&gt;
+&lt;p&gt;So every &amp;quot;account&amp;quot; had additional information that represent the transaction that last touched it.&lt;&#x2F;p&gt;
+&lt;p&gt;Running transactions in parallel is more implementation detail and will depend on the programming language.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;example-2-chains-transactions-dependencies&quot;&gt;Example 2: Chains, transactions dependencies.&lt;&#x2F;h3&gt;
+&lt;p&gt;The second example is having a third transaction that depends on the first one.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;parallel_evm_claim&#x2F;example_chain.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpdjjEOwjAMRa8SeUTNQMuUgYmViZEwWI0LkZoEpU4Fqnp3DC1CwtPX-7b1JmiTIzAwMDIdPF4zBj3WNiqZ8-aitN4rfmwXIGEFzRc0K9j9n9RQQaAc0Dv5P71rC3yjQBaMREcdlp4t2DjLKhZOp2dswXAuVEG5u58RmA77QSg5zykfF-eP-vwC_v88KA&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;This is the first example of dependent transactions and&lt;code&gt;tx3&lt;&#x2F;code&gt; can access only accounts that are in the original state or touched by &lt;code&gt;tx1&lt;&#x2F;code&gt;, if both &lt;code&gt;tx3&lt;&#x2F;code&gt; and &lt;code&gt;tx2&lt;&#x2F;code&gt; access the same account this would make the parallelism claim invalid.&lt;&#x2F;p&gt;
+&lt;p&gt;This example show&#x27;s us that marking of state can be done by chain ids that this tx belongs to and we would get the same outcome. Without this &lt;code&gt;tx4&lt;&#x2F;code&gt; would need to check if the account state is original or marked by &lt;code&gt;tx1&lt;&#x2F;code&gt; or marked by &lt;code&gt;tx3&lt;&#x2F;code&gt; and that wouldn&#x27;t be efficient. I will use the terms chain and transaction interchangeably.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;example-3-chain-forks-and-joins&quot;&gt;Example 3: Chain forks and joins&lt;&#x2F;h2&gt;
+&lt;p&gt;Modelling dependency can be tricky but in parallel execution, there are only two synchronizations that can happen. And those are forks and joins and both of them can be seen in the picture.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;parallel_evm_claim&#x2F;example_fork_join.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpdj7EOwjAMRH-l8oiagRSWDEysTIwNg9W4EKlJUOogUNV_J9BWFXg6vTtZdwM0wRAo6BmZjhavEZ14SO2LfPXmUghxKPi5nUAWM6gWUM1g95_YL0D-gvWphBIcRYfW5AbDx9bAN3KkQWVpqMXUsQbtxxzFxOH88g0ojolKSHezdgbVYtdnSsZyiKdp1Xfc-AaEXkTp&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;There is one fork here, and can be seen in the example of &lt;code&gt;tx1&lt;&#x2F;code&gt; that forks its state to chains of &lt;code&gt;tx5&lt;&#x2F;code&gt; and &lt;code&gt;tx3&lt;&#x2F;code&gt;. This means that there is a dependency between &lt;code&gt;tx5&lt;&#x2F;code&gt; and &lt;code&gt;tx1&lt;&#x2F;code&gt;, &lt;code&gt;tx3&lt;&#x2F;code&gt; and &lt;code&gt;tx1&lt;&#x2F;code&gt; but there are no dependencies on &lt;code&gt;tx3&lt;&#x2F;code&gt; and &lt;code&gt;tx5&lt;&#x2F;code&gt; and they can be run in parallel.&lt;&#x2F;p&gt;
+&lt;p&gt;The mechanism of marking the state works the same as in the first example. &lt;code&gt;tx5&lt;&#x2F;code&gt; can now access the account of the original or &lt;code&gt;tx1&lt;&#x2F;code&gt; or &lt;code&gt;tx2&lt;&#x2F;code&gt; accounts if it accessed the state of &lt;code&gt;tx3&lt;&#x2F;code&gt; or &lt;code&gt;tx3&lt;&#x2F;code&gt; this would make parallel claim invalid.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;example-4-diamond-pattern&quot;&gt;Example 4: Diamond pattern&lt;&#x2F;h2&gt;
+&lt;p&gt;This is a good example that tests our initial mechanism of marking of accessed state.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;parallel_evm_claim&#x2F;example_diamont.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;All previous statements should be valid here.&lt;&#x2F;p&gt;
+&lt;p&gt;For example &lt;code&gt;tx7&lt;&#x2F;code&gt; can only touch original state or &lt;code&gt;tx1&lt;&#x2F;code&gt;,&lt;code&gt;tx2&lt;&#x2F;code&gt;,&lt;code&gt;tx3&lt;&#x2F;code&gt;,&lt;code&gt;tx4&lt;&#x2F;code&gt;,&lt;code&gt;tx5&lt;&#x2F;code&gt; but not &lt;code&gt;tx6&lt;&#x2F;code&gt;, and same with &lt;code&gt;tx6&lt;&#x2F;code&gt; it can&#x27;t touch state of &lt;code&gt;tx7&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;how-to-check-marks&quot;&gt;How to check marks&lt;&#x2F;h2&gt;
+&lt;p&gt;Every transaction could have a list of previous dependent transactions, and when checking the mark inside the database we compare it if it is found inside that list.&lt;&#x2F;p&gt;
+&lt;p&gt;This list can be sorted so finding particular values can be done by binary search. The list size depends on the number of dependent transactions.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;miner-fee&quot;&gt;miner fee&lt;&#x2F;h1&gt;
+&lt;p&gt;The problem with the current setup is that transaction pays the fee of execution to the miner after a transaction is finished, this would mean that every transaction depends on its predecessor miner balance to update it with this transaction fee. A simple solution for this is to just move the fee balance increment of the miner at the end of the block after all transactions are executed. This is a small consensus change without a lot of general impact, but as said it is a &amp;quot;consensus change&amp;quot; for us to parallelize transactions with the DAG hints we need a different solution.&lt;&#x2F;p&gt;
+&lt;p&gt;This solution requires a lot of small things we need to make it consistent:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;we should mark those transactions in DAG that need miner information and make them dependent on all previous transactions.&lt;&#x2F;li&gt;
+&lt;li&gt;We need to have an additional atomic vector that is the size of the number of transactions and it will contain an increment of the miner balance, and it is updated async when transaction execution finishes.&lt;&#x2F;li&gt;
+&lt;li&gt;We need a hint when miner balance information is needed, this is only possible in a few situations. This hint or a flag should be checked against the flag set inside DAG to see that this information is done correctly:
+&lt;ul&gt;
+&lt;li&gt;Opcode BALANCE is called for a miner&lt;&#x2F;li&gt;
+&lt;li&gt;When the miner account is the contract and it transfers funds or calls SELFBALANCE opcode. We can be a little loose and say when the miner as a contract is called.&lt;&#x2F;li&gt;
+&lt;li&gt;If the miner account is an ordinary account and there is a transaction with the miner as a sender.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;After all transactions are executed apply the rest of the transaction fee to the miner.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;The solution requires a little bit of hoop jumping but it is possible to make and have verifiable parallel execution.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;usage&quot;&gt;Usage&lt;&#x2F;h1&gt;
+&lt;p&gt;When live syncing, builders could potentially get more rewards if they find transactions that can be done in parallel. This would mean more throughput without state increase.&lt;&#x2F;p&gt;
+&lt;p&gt;On history sync, we can obtain DAGs from centralized sources, and if we have verifiable parallel execution we don&#x27;t need to trust that DAG and can do verification of parallel execution on our own, if received DAG is not correct we can just fall back to serial execution. This can potentially speed up initial archive sync by X factor.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;further-works&quot;&gt;Further works&lt;&#x2F;h1&gt;
+&lt;h3 id=&quot;split-of-reads-and-writes&quot;&gt;Split of reads and writes:&lt;&#x2F;h3&gt;
+&lt;p&gt;This could make transactions ever more parallel.&lt;&#x2F;p&gt;
+&lt;p&gt;The main idea behind this is that chain that writes an account should be the only one that can read that account. And few more checks need to be done&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;If the account is read by two chains but written in one it is considered a potential data race.&lt;&#x2F;li&gt;
+&lt;li&gt;For every account read we should append the transaction number, and on every write, we should check if those reads connect to the same chain and mark that account as written and clear read list. And if there is a transaction from a different chain&#x2F;predecessor that has written an account before us this is making the claim invalid. This means that every account now has the last transactions that wrote it and the list of transactions that have read it.&lt;&#x2F;li&gt;
+&lt;li&gt;If we want to read the account we should first check if it is written by the predecessor, if it is not, this makes the claim invalid.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;This is optimization for this architecture.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;gas-calculation&quot;&gt;Gas calculation&lt;&#x2F;h3&gt;
+&lt;p&gt;One of the pending things that need to be defined when parallel transactions are considered for inclusion. This probably can be done by some calculation on the DAG and its weight (gas).&lt;&#x2F;p&gt;
+&lt;p&gt;Separation of current gas accounting on CPU gas and disk io gas firstly specified in &lt;a href=&quot;https:&#x2F;&#x2F;ethresear.ch&#x2F;t&#x2F;multidimensional-eip-1559&#x2F;11651&quot;&gt;multidimentional EIP1559&lt;&#x2F;a&gt; is probably desirable, but not required. Gas calculation is always a sensitive topic as it can be abused if not done correctly.&lt;&#x2F;p&gt;
+&lt;p&gt;And as CPU cores are limited, we can have limitations on transaction DAG format.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>2D UI beginner guide. Learn to rotate&#x2F;translate&#x2F;scale</title>
+        <published>2022-04-20T09:19:42+00:00</published>
+        <updated>2020-04-20T09:19:42+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rakita.github.io/blog/blog/2d-transformations/" type="text/html"/>
+        <id>https://rakita.github.io/blog/blog/2d-transformations/</id>
+        
+        <content type="html">&lt;p&gt;Recently I had pleasure to make UI for standard rotate&#x2F;scale&#x2F;translate controls on element with some bounding box. I told myself: great! this will be easy! Lets google it, make some matrices and this will be quickly finished... must say that it took me a bit longer. Internet didn&#x27;t help me with comprehensive solution or guide, I needed to stitch stuff together, and at the end of my frustration I got inspired to write this.&lt;&#x2F;p&gt;
+&lt;p&gt;I will give small intro about rotation and translation because they can be easily implemented and will focus my attention to scaling that made me warm around my hearth (or maybe that was my frustration). At the end you can find TLDR section with aggregated functions that we call.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;transformations&quot;&gt;Transformations&lt;&#x2F;h1&gt;
+&lt;p&gt;Transformation for 2D is constituted of tree things: Rotation, Scaling and Translation and all three things can be represented with one 2x3 matrix (but because of conformity that matrix multiplication give us we add some zero padding and use 3x3). When thinking about matrix most of times I see only a black box, nothing more, I know what I can do with them, and avoid manually setting things. Most important things that we need to take care when matrixing is the order on how we do transformation, it matters, &lt;code&gt;Mfirst*Msecond&lt;&#x2F;code&gt; is not same as &lt;code&gt;Msecond*Mfirst&lt;&#x2F;code&gt; and it depends if we are using row or column major matrices.&lt;&#x2F;p&gt;
+&lt;p&gt;Some info on our setup. Our original element (before transformations), has some size &lt;code&gt;original_size&lt;&#x2F;code&gt;, it is rectangular shape (or his bounding box is), it lies in first quadrant with starting position at coordinate beginning. And we are using row major order matrices (This means order of multiplication of matrices is from left to right &lt;code&gt;Mfirst*Msecond&lt;&#x2F;code&gt;) additionally, we are using these points:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;ref_point&lt;&#x2F;code&gt;: point from where transformation is started for rotation&#x2F;scale this is corner that we selected, for translation this is point where user clicked and started to drag our element.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;current_point&lt;&#x2F;code&gt;: current mouse point, it is point where we want to rotate&#x2F;scale&#x2F;translate&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;M&lt;&#x2F;code&gt; : transformation matrix that was already applied on our element.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;anchor_point&lt;&#x2F;code&gt;: other side from &lt;code&gt;ref_point&lt;&#x2F;code&gt;, (opposite corner or side). Needed for scaling.&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;center_point&lt;&#x2F;code&gt; : &lt;code&gt;ref_point-anchor_point&lt;&#x2F;code&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;original_size&lt;&#x2F;code&gt;: Original size of our element (For some systems, element can be normalized to (1,1), but for this example I think it is better to show how we are effected if there is size).&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Okay, lets get started from easy to hard:&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;translation&quot;&gt;Translation&lt;&#x2F;h2&gt;
+&lt;p&gt;Translation is most simple of them all, it moves point by specified vector, and nothing more. It is used in tandem with rotation or scaling to center already moved&#x2F;rotated element, but this will be explained in due time. For our UI you take point when mouse is clicked &lt;code&gt;ref_point&lt;&#x2F;code&gt;. And take current point where mouse moved &lt;code&gt;current_point&lt;&#x2F;code&gt;. get diff and create translation matrix as this &lt;code&gt;M=M*translation(current_point-ref_point)&lt;&#x2F;code&gt; and voila, we are done.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;rotation&quot;&gt;Rotation&lt;&#x2F;h2&gt;
+&lt;p&gt;Rotation is little bit more complex (it has little bit more to do) but in same rank as translation. We need reference point &lt;code&gt;ref_point&lt;&#x2F;code&gt; for selected element. Rotation is usually, not to say always, done around element center, for this we need &lt;code&gt;center_point&lt;&#x2F;code&gt;. And lastly we have &lt;code&gt;current_point&lt;&#x2F;code&gt;. As you can guest we need to find the angle between these two vectors &lt;code&gt;x=ref_point-center_point&lt;&#x2F;code&gt; and &lt;code&gt;y=current_point-center_point&lt;&#x2F;code&gt;. After consulting internet we get this equation:&lt;code&gt;angle = atan2(norm(cross(x,y)), dot(x,y))&lt;&#x2F;code&gt;. With angle found we can call function for creating matrix, something like &lt;code&gt;R=rotation(angle)&lt;&#x2F;code&gt;. Appending &lt;code&gt;R&lt;&#x2F;code&gt; to transformation matrix &lt;code&gt;M&lt;&#x2F;code&gt; is done with this simple but very used and important trick: We create another matrix of translation from elements center &lt;code&gt;T=translation(center_point)&lt;&#x2F;code&gt;, and it&#x27;s inverse&lt;code&gt;Tinv = inverse(T)&lt;&#x2F;code&gt;. We get matrix that we can use to append transformation to already present points &lt;code&gt;Ra = Tinv*R*T&lt;&#x2F;code&gt; and final transformation is &lt;code&gt;M=M*Ra&lt;&#x2F;code&gt;. Basically (with &lt;code&gt;Tinv&lt;&#x2F;code&gt; we just nullify translation, we then rotate our element around center and apply T to put it back into old position).&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;scale&quot;&gt;Scale&lt;&#x2F;h2&gt;
+&lt;p&gt;And we come to scaling, it is best part of this post (it has pictures) :D. We will gradually introducing few things that needs to be done in scaling, we will see how we handle rotation, and shift controls (shift is usually used for aspect ration lock).&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;2d_transformations&#x2F;naive_scale.png&quot; alt=&quot;Naive Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;Nice, lets start with basic example where our element is not rotated or translated and we just want to scale it. We will use &lt;code&gt;ref_point&lt;&#x2F;code&gt; (corner or side usually), and its &lt;code&gt;anchor_point&lt;&#x2F;code&gt; and of course we will need &lt;code&gt;current_point&lt;&#x2F;code&gt; to tell us where we want to scale to. We calculate &lt;code&gt;diff=current_point-anchor_point&lt;&#x2F;code&gt;, get scale as &lt;code&gt;s=scale(diff&#x2F;element_size)&lt;&#x2F;code&gt; and we are done, we have scale matrix that can add to our transformation.&lt;&#x2F;p&gt;
+&lt;p&gt;Okay, lets now look on example where we want to take top left corner &lt;code&gt;ref_point&lt;&#x2F;code&gt; ( you can follow picture below), in that case our &lt;code&gt;anchor_point&lt;&#x2F;code&gt; is positioned at bottom and if we want to scale it properly, to top and left. First difference from previous example is that we will need to move our object so that &lt;code&gt;anchor_point&lt;&#x2F;code&gt; is in &lt;code&gt;(0.0)&lt;&#x2F;code&gt; coordinate! We still need &lt;code&gt;diff&lt;&#x2F;code&gt; and we are calculating it same as before, but because now our axis are flipped, this is second difference, we need to reverse sign of &lt;code&gt;diff_new=Vector(-diff.x,-diff.y)&lt;&#x2F;code&gt;. Note, reversing &lt;code&gt;y&lt;&#x2F;code&gt; is needed for top side &lt;code&gt;ref_point&lt;&#x2F;code&gt; and reversing &lt;code&gt;x&lt;&#x2F;code&gt; for left side &lt;code&gt;ref_point&lt;&#x2F;code&gt;. We get scale as &lt;code&gt;s=scale(diff_new&#x2F;element_size)&lt;&#x2F;code&gt; . And final third difference from previous example is that after all this we need to take translation of anchor &lt;code&gt;T=translate(anchor_point)&lt;&#x2F;code&gt;, calculate inverse &lt;code&gt;Tinv=inverse(T)&lt;&#x2F;code&gt; and bind it all together (from left to right) &lt;code&gt;S=T*s*Tin&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;2d_transformations&#x2F;scale.png&quot; alt=&quot;Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;As you can see diff vector is oriented to negative in reference to our axis, this is reason why we need to flip it, if we didn&#x27;t do flipping you would get small scale when moving away from top left corner.&lt;&#x2F;p&gt;
+&lt;p&gt;This will all work just fine if element is not in any way rotated (Yey rotation!), with rotation we are now in bind how to calculate our diff and extract scale information. But, don&#x27;t despair, we can use same trick as we did with rotation in a way that we will take &lt;code&gt;current_position&lt;&#x2F;code&gt; and inverse of current transformation matrix &lt;code&gt;Minv = inverse(M)&lt;&#x2F;code&gt; and get &lt;code&gt;relative_position=Minv*current_position&lt;&#x2F;code&gt;. Relative position now presents point relative to our &lt;strong&gt;original&lt;&#x2F;strong&gt; element. We get corner of original element as: &lt;code&gt;original_anchor_point=original_corners[handler_id]&lt;&#x2F;code&gt; (take care to select correct corner, it is probably jumbled up with rotation, I had something like &lt;code&gt;handler_id&lt;&#x2F;code&gt; to help me with that) and do same as we did in our last example, calculate diff as &lt;code&gt;diff=relative_position-original_corners[handler_id]&lt;&#x2F;code&gt;, and if needed invert its axis. Calculate scale as &lt;code&gt;s=scale(diff_new&#x2F;element_original_size)&lt;&#x2F;code&gt; and now similarly as previous scale example we need to move our original element to anchor before we do scaling, bear in mind that that translation represent anchor when our element is &lt;strong&gt;not&lt;&#x2F;strong&gt; transformation. We get &lt;code&gt;T=translate(original_anchor_point)&lt;&#x2F;code&gt; and its inverse &lt;code&gt;Tinv&lt;&#x2F;code&gt; and we get &lt;code&gt;S=T*s*Tinv&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;That&#x27;s great, but how to append scale in current matrix, when scale is something that is done before rotation and translation? We could always prepend scale to &lt;code&gt;M&lt;&#x2F;code&gt;, and this is only way to properly add scale, mostly because we are using &lt;code&gt;S*R*T&lt;&#x2F;code&gt; order. But how to get matrix to apply directly on already transformed points? Hah, just take &lt;code&gt;Minv = inverse(M)&lt;&#x2F;code&gt; and get transformation that we can append on present points as &lt;code&gt;Sa=Minv*S*M&lt;&#x2F;code&gt;, and final matrix is &lt;code&gt;M=M*Sa&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;shift-scale&quot;&gt;Shift scale&lt;&#x2F;h2&gt;
+&lt;p&gt;Shift scale is scaling where aspect ration is not changed. This means that scale on both axis is equal and we need to choose which axis orientation we will take as primary. We could make it simple and depending on which corner_id is selected that take modulo of two and chose x or y scale, this will work but will be unintuitive. For better solution where depending on position of mouse relative to diagonal of element we will get smother transition between x and y orientation. See picture below:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;&#x2F;2d_transformations&#x2F;shyft_scale.png&quot; alt=&quot;Naive Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;With transparent colors we can see zones where we want to take only &lt;code&gt;x&lt;&#x2F;code&gt; ( blue color) or take only &lt;code&gt;y&lt;&#x2F;code&gt; (marked with red). As noticeable our object is in original position that means our &lt;code&gt;original_points&lt;&#x2F;code&gt; is calculated same as in example with rotated object. Slope of diagonals that make these zones are calculated from &lt;code&gt;original_size&lt;&#x2F;code&gt; with equation &lt;code&gt;line_slope = original_size.y&#x2F;original_size.x&lt;&#x2F;code&gt; . for second diagonal it is enough to just flip sign and we will get second slope. what we want to check is if point is in blue or red space and we can do that following if statement: (for abbreviate: &lt;code&gt;op&lt;&#x2F;code&gt; is &lt;code&gt;original_point&lt;&#x2F;code&gt; , &lt;code&gt;ls&lt;&#x2F;code&gt; is &lt;code&gt;line_slope&lt;&#x2F;code&gt; ): &lt;code&gt;(op.y &amp;lt; ls**op.x &amp;amp;&amp;amp; op.y &amp;gt; -ls**op.x) || (op.y &amp;gt; op.x**ls &amp;amp;&amp;amp; op.y &amp;lt; -ls**op.x)&lt;&#x2F;code&gt;, and if this if statement is true do &lt;code&gt;scale.y=scale.x&lt;&#x2F;code&gt; if it is false do opposite. And lastly don&#x27;t forget that when you are overriding one scale to not override its sign, in example from picture we are taking &lt;code&gt;y&lt;&#x2F;code&gt; scale and overriding &lt;code&gt;x&lt;&#x2F;code&gt; scale but we need to preserve &lt;code&gt;x&lt;&#x2F;code&gt; sign to properly scale our element &lt;code&gt;x=sign(x)*abs(y)&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;tldr&quot;&gt;TLDR&lt;&#x2F;h2&gt;
+&lt;p&gt;Summary of functions that were called throughout the text:&lt;&#x2F;p&gt;
+&lt;p&gt;Translation:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;M = M*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;translation&lt;&#x2F;span&gt;&lt;span&gt;(current_point-ref_point)
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Rotation:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;crp  =ref_point - center_point
+&lt;&#x2F;span&gt;&lt;span&gt;ccp = current_point - center_point
+&lt;&#x2F;span&gt;&lt;span&gt;angle = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;atan2&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;norm&lt;&#x2F;span&gt;&lt;span&gt;(&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;cross&lt;&#x2F;span&gt;&lt;span&gt;(crp,ccp)), &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;dot&lt;&#x2F;span&gt;&lt;span&gt;(crp,ccp))
+&lt;&#x2F;span&gt;&lt;span&gt;R = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;rotate&lt;&#x2F;span&gt;&lt;span&gt;(angle)
+&lt;&#x2F;span&gt;&lt;span&gt;T = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;translation&lt;&#x2F;span&gt;&lt;span&gt;(center_point)
+&lt;&#x2F;span&gt;&lt;span&gt;Tinv = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;inverse&lt;&#x2F;span&gt;&lt;span&gt;(T)
+&lt;&#x2F;span&gt;&lt;span&gt;Ra = Tinv*R*T	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;diff that can be used to apply to already transformed points
+&lt;&#x2F;span&gt;&lt;span&gt;M = M*Ra
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Scale:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;Minv = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;inverse&lt;&#x2F;span&gt;&lt;span&gt;(M)
+&lt;&#x2F;span&gt;&lt;span&gt;relative_position = Minv * current_position
+&lt;&#x2F;span&gt;&lt;span&gt;original_anchor_point = original_corners[handler_id]
+&lt;&#x2F;span&gt;&lt;span&gt;diff = relative_position - original_anchor_point
+&lt;&#x2F;span&gt;&lt;span&gt;s = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;scale&lt;&#x2F;span&gt;&lt;span&gt;(diff&#x2F;element_original_size)
+&lt;&#x2F;span&gt;&lt;span&gt;T = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;translate&lt;&#x2F;span&gt;&lt;span&gt;(original_anchor_point)
+&lt;&#x2F;span&gt;&lt;span&gt;Tinv = &lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;inverse&lt;&#x2F;span&gt;&lt;span&gt;(T)
+&lt;&#x2F;span&gt;&lt;span&gt;S = T*s*Tinv
+&lt;&#x2F;span&gt;&lt;span&gt;Sa = Minv*S*M	&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F;diff that can be used to apply to already transformed points
+&lt;&#x2F;span&gt;&lt;span&gt;M=M*Sa
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;Shift scale:&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span&gt;scale = (x,y)
+&lt;&#x2F;span&gt;&lt;span&gt;line_slope = original_size.y&#x2F;original_size.x
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;if &lt;&#x2F;span&gt;&lt;span&gt;(op.y &amp;lt; ls**op.x &amp;amp;&amp;amp; op.y &amp;gt; -ls**op.x) || (op.y &amp;gt; op.x**ls &amp;amp;&amp;amp; op.y &amp;lt; -ls**op.x) {
+&lt;&#x2F;span&gt;&lt;span&gt;	scale.y = x=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sign&lt;&#x2F;span&gt;&lt;span&gt;(y)*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;abs&lt;&#x2F;span&gt;&lt;span&gt;(x)
+&lt;&#x2F;span&gt;&lt;span&gt;} &lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;else &lt;&#x2F;span&gt;&lt;span&gt;{
+&lt;&#x2F;span&gt;&lt;span&gt;	scale.x x=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sign&lt;&#x2F;span&gt;&lt;span&gt;(x)*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;abs&lt;&#x2F;span&gt;&lt;span&gt;(y)
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>Hello World</title>
+        <published>2021-05-01T09:19:42+00:00</published>
+        <updated>2021-05-01T09:19:42+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rakita.github.io/blog/blog/hello-world/" type="text/html"/>
+        <id>https://rakita.github.io/blog/blog/hello-world/</id>
+        
+        <content type="html">&lt;pre data-lang=&quot;rust&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-rust &quot;&gt;&lt;code class=&quot;language-rust&quot; data-lang=&quot;rust&quot;&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; This is a comment, and is ignored by the compiler
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; This is the main function
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#b48ead;&quot;&gt;fn &lt;&#x2F;span&gt;&lt;span style=&quot;color:#8fa1b3;&quot;&gt;main&lt;&#x2F;span&gt;&lt;span&gt;() {
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Statements here are executed when the compiled binary is called
+&lt;&#x2F;span&gt;&lt;span&gt;
+&lt;&#x2F;span&gt;&lt;span&gt;    &lt;&#x2F;span&gt;&lt;span style=&quot;color:#65737e;&quot;&gt;&#x2F;&#x2F; Print text to the console
+&lt;&#x2F;span&gt;&lt;span&gt;    println!(&amp;quot;&lt;&#x2F;span&gt;&lt;span style=&quot;color:#a3be8c;&quot;&gt;Hello World!&lt;&#x2F;span&gt;&lt;span&gt;&amp;quot;);
+&lt;&#x2F;span&gt;&lt;span&gt;}
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;println!&lt;&#x2F;code&gt; is a macro that prints text to the console.&lt;&#x2F;p&gt;
+&lt;p&gt;A binary can be generated using the Rust compiler: &lt;code&gt;rustc&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; rustc hello.rs
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+&lt;p&gt;&lt;code&gt;rustc&lt;&#x2F;code&gt; will produce a &lt;code&gt;hello&lt;&#x2F;code&gt; binary that can be executed.&lt;&#x2F;p&gt;
+&lt;pre data-lang=&quot;bash&quot; style=&quot;background-color:#2b303b;color:#c0c5ce;&quot; class=&quot;language-bash &quot;&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;$&lt;&#x2F;span&gt;&lt;span&gt; .&#x2F;hello
+&lt;&#x2F;span&gt;&lt;span style=&quot;color:#bf616a;&quot;&gt;Hello&lt;&#x2F;span&gt;&lt;span&gt; World!
+&lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
+        <title>draganrakita</title>
+        <published>2021-04-01T08:50:45+00:00</published>
+        <updated>2021-04-01T08:50:45+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rakita.github.io/blog/authors/draganrakita/" type="text/html"/>
+        <id>https://rakita.github.io/blog/authors/draganrakita/</id>
+        
+        <content type="html">&lt;p&gt;Creator of &lt;strong&gt;Blog&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rakita&quot;&gt;@aaranxu&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+</feed>
