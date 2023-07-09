@@ -1,8 +1,8 @@
 +++
 title = "Parallel EVM claim"
 description = "How to verify claim of parallel execution"
-date = 2023-07-09T22:00:00+00:00
-updated = 2023-07-09T22:00:00+00:00
+date = 2023-07-09T22:20:00+00:00
+updated = 2023-07-09T22:20:00+00:00
 draft = false
 template = "blog/page.html"
 
@@ -28,9 +28,9 @@ All examples start from the point that we received a DAG of transaction and the 
 
 We have two transactions that read/write to the **same** state (there is only one state that all of them share) and the update to that state is atomic. The example here is very simple but it allows us to set up some groundwork and initial ideas of what is checked.
 
-[Mermaid graph](https://mermaid.live/edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp)
-
 ![](./example_2tx.png)
+
+[Graph](https://mermaid.live/edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp)
 
 
 For the sake of explaining we are simplifying state and seeing it as a list of accounts, these "accounts" can be a balance/nonce/code hash(code)/storage slot, it is just easier to reason and think about in simpler form.
@@ -50,7 +50,6 @@ The second example is having a third transaction that depends on the first one.
 
 ![](./example_chain.png)
 
-
 [Graph](https://mermaid.live/edit#pako:eNpdjjEOwjAMRa8SeUTNQMuUgYmViZEwWI0LkZoEpU4Fqnp3DC1CwtPX-7b1JmiTIzAwMDIdPF4zBj3WNiqZ8-aitN4rfmwXIGEFzRc0K9j9n9RQQaAc0Dv5P71rC3yjQBaMREcdlp4t2DjLKhZOp2dswXAuVEG5u58RmA77QSg5zykfF-eP-vwC_v88KA)
 
 This is the first example of dependent transactions and`tx3` can access only accounts that are in the original state or touched by `tx1`, if both `tx3` and `tx2` access the same account this would make the parallelism claim invalid.
@@ -63,7 +62,6 @@ Modelling dependency can be tricky but in parallel execution, there are only two
 
 ![](./example_fork_join.png)
 
-
 [Graph](https://mermaid.live/edit#pako:eNpdj7EOwjAMRH-l8oiagRSWDEysTIwNg9W4EKlJUOogUNV_J9BWFXg6vTtZdwM0wRAo6BmZjhavEZ14SO2LfPXmUghxKPi5nUAWM6gWUM1g95_YL0D-gvWphBIcRYfW5AbDx9bAN3KkQWVpqMXUsQbtxxzFxOH88g0ojolKSHezdgbVYtdnSsZyiKdp1Xfc-AaEXkTp)
 
 There is one fork here, and can be seen in the example of `tx1` that forks its state to chains of `tx5` and `tx3`. This means that there is a dependency between `tx5` and `tx1`, `tx3` and `tx1` but there are no dependencies on `tx3` and `tx5` and they can be run in parallel.
@@ -75,14 +73,13 @@ The mechanism of marking the state works the same as in the first example. `tx5`
 
 This is a good example that tests our initial mechanism of marking of accessed state.
 
-[Graph](https://mermaid.live/edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg)
-
 ![](./example_diamont.png)
 
+[Graph](https://mermaid.live/edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg)
 
 All previous statements should be valid here.
 
-For example `tx7` can only touch original state or `tx1`,`tx2`,`tx3`,`tx4`,`tx5` but not `tx6`, and same with `tx6` it can't touch state of `tx7`
+For example `tx7` can only touch original state or `tx1`, `tx2`, `tx3`, `tx4`, `tx5` but not `tx6`, and same with `tx6` it can't touch state of `tx7`
 
 ## How to check marks
 

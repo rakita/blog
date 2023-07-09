@@ -5,12 +5,12 @@
     <link href="https://rakita.github.io/blog/atom.xml" rel="self" type="application/atom+xml"/>
     <link href="https://rakita.github.io/blog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2023-07-09T22:00:00+00:00</updated>
+    <updated>2023-07-09T22:20:00+00:00</updated>
     <id>https://rakita.github.io/blog/atom.xml</id>
     <entry xml:lang="en">
         <title>Parallel EVM claim</title>
-        <published>2023-07-09T22:00:00+00:00</published>
-        <updated>2023-07-09T22:00:00+00:00</updated>
+        <published>2023-07-09T22:20:00+00:00</published>
+        <updated>2023-07-09T22:20:00+00:00</updated>
         <author>
           <name>Unknown</name>
         </author>
@@ -25,8 +25,8 @@
 &lt;p&gt;All examples start from the point that we received a DAG of transaction and the builder claims that transaction can be done in parallel. We want to execute those transactions in parallel and be sure that the claim is correct and that there are no inconsistencies (data races) that can happen.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;example-1-simple-two-parallel-transactions&quot;&gt;Example 1: simple two parallel transactions&lt;&#x2F;h3&gt;
 &lt;p&gt;We have two transactions that read&#x2F;write to the &lt;strong&gt;same&lt;&#x2F;strong&gt; state (there is only one state that all of them share) and the update to that state is atomic. The example here is very simple but it allows us to set up some groundwork and initial ideas of what is checked.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp&quot;&gt;Mermaid graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;parallel-evm-claim&#x2F;.&#x2F;example_2tx.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;For the sake of explaining we are simplifying state and seeing it as a list of accounts, these &amp;quot;accounts&amp;quot; can be a balance&#x2F;nonce&#x2F;code hash(code)&#x2F;storage slot, it is just easier to reason and think about in simpler form.&lt;&#x2F;p&gt;
 &lt;p&gt;Additionally, we should consider both reads and writes of accounts as the same thing. This can be explored as a follow-up but for the first iteration, it is easier to omit this distinction. So this means that the transaction touched state consists of both reads and writes that this transaction did. And with this, having an account read from two different parallel transactions is considered invalid.&lt;&#x2F;p&gt;
 &lt;p&gt;Now, the idea here is that on every access of an account (read or write) to mark that account in the state as accessed by that transaction. This means that if account &lt;code&gt;0x01&lt;&#x2F;code&gt; is accessed by &lt;code&gt;tx1&lt;&#x2F;code&gt; it will be marked as such and if &lt;code&gt;tx2&lt;&#x2F;code&gt; tries to access account &lt;code&gt;0x1&lt;&#x2F;code&gt; we will notice that account is already marked and see that there is inconsistency and data race in place.&lt;&#x2F;p&gt;
@@ -46,10 +46,10 @@
 &lt;p&gt;The mechanism of marking the state works the same as in the first example. &lt;code&gt;tx5&lt;&#x2F;code&gt; can now access the account of the original or &lt;code&gt;tx1&lt;&#x2F;code&gt; or &lt;code&gt;tx2&lt;&#x2F;code&gt; accounts if it accessed the state of &lt;code&gt;tx3&lt;&#x2F;code&gt; or &lt;code&gt;tx3&lt;&#x2F;code&gt; this would make parallel claim invalid.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;example-4-diamond-pattern&quot;&gt;Example 4: Diamond pattern&lt;&#x2F;h2&gt;
 &lt;p&gt;This is a good example that tests our initial mechanism of marking of accessed state.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;parallel-evm-claim&#x2F;.&#x2F;example_diamont.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;All previous statements should be valid here.&lt;&#x2F;p&gt;
-&lt;p&gt;For example &lt;code&gt;tx7&lt;&#x2F;code&gt; can only touch original state or &lt;code&gt;tx1&lt;&#x2F;code&gt;,&lt;code&gt;tx2&lt;&#x2F;code&gt;,&lt;code&gt;tx3&lt;&#x2F;code&gt;,&lt;code&gt;tx4&lt;&#x2F;code&gt;,&lt;code&gt;tx5&lt;&#x2F;code&gt; but not &lt;code&gt;tx6&lt;&#x2F;code&gt;, and same with &lt;code&gt;tx6&lt;&#x2F;code&gt; it can&#x27;t touch state of &lt;code&gt;tx7&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;For example &lt;code&gt;tx7&lt;&#x2F;code&gt; can only touch original state or &lt;code&gt;tx1&lt;&#x2F;code&gt;, &lt;code&gt;tx2&lt;&#x2F;code&gt;, &lt;code&gt;tx3&lt;&#x2F;code&gt;, &lt;code&gt;tx4&lt;&#x2F;code&gt;, &lt;code&gt;tx5&lt;&#x2F;code&gt; but not &lt;code&gt;tx6&lt;&#x2F;code&gt;, and same with &lt;code&gt;tx6&lt;&#x2F;code&gt; it can&#x27;t touch state of &lt;code&gt;tx7&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;how-to-check-marks&quot;&gt;How to check marks&lt;&#x2F;h2&gt;
 &lt;p&gt;Every transaction could have a list of previous dependent transactions, and when checking the mark inside the database we compare it if it is found inside that list.&lt;&#x2F;p&gt;
 &lt;p&gt;This list can be sorted so finding particular values can be done by binary search. The list size depends on the number of dependent transactions.&lt;&#x2F;p&gt;
@@ -90,9 +90,24 @@
         
     </entry>
     <entry xml:lang="en">
+        <title>draganrakita</title>
+        <published>2021-04-01T08:50:45+00:00</published>
+        <updated>2021-04-01T08:50:45+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rakita.github.io/blog/authors/draganrakita/" type="text/html"/>
+        <id>https://rakita.github.io/blog/authors/draganrakita/</id>
+        
+        <content type="html">&lt;p&gt;Creator of &lt;strong&gt;Blog&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rakita&quot;&gt;@aaranxu&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
+    <entry xml:lang="en">
         <title>2D UI beginner guide. Learn to rotate&#x2F;translate&#x2F;scale</title>
-        <published>2022-04-20T09:19:42+00:00</published>
-        <updated>2020-04-20T09:19:42+00:00</updated>
+        <published>2019-12-20T09:19:42+00:00</published>
+        <updated>2019-12-20T09:19:42+00:00</updated>
         <author>
           <name>Unknown</name>
         </author>
@@ -166,21 +181,6 @@
 &lt;&#x2F;span&gt;&lt;span&gt;	scale.x x=&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;sign&lt;&#x2F;span&gt;&lt;span&gt;(x)*&lt;&#x2F;span&gt;&lt;span style=&quot;color:#96b5b4;&quot;&gt;abs&lt;&#x2F;span&gt;&lt;span&gt;(y)
 &lt;&#x2F;span&gt;&lt;span&gt;}
 &lt;&#x2F;span&gt;&lt;&#x2F;code&gt;&lt;&#x2F;pre&gt;
-</content>
-        
-    </entry>
-    <entry xml:lang="en">
-        <title>draganrakita</title>
-        <published>2021-04-01T08:50:45+00:00</published>
-        <updated>2021-04-01T08:50:45+00:00</updated>
-        <author>
-          <name>Unknown</name>
-        </author>
-        <link rel="alternate" href="https://rakita.github.io/blog/authors/draganrakita/" type="text/html"/>
-        <id>https://rakita.github.io/blog/authors/draganrakita/</id>
-        
-        <content type="html">&lt;p&gt;Creator of &lt;strong&gt;Blog&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rakita&quot;&gt;@aaranxu&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 </content>
         
     </entry>

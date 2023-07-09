@@ -69,8 +69,8 @@
       },
       "headline": "Parallel EVM claim",
       "image": ,
-      "datePublished": "2023-07-09T22:00:00+00:00",
-      "dateModified": "2023-07-09T22:00:00+00:00",
+      "datePublished": "2023-07-09T22:20:00+00:00",
+      "dateModified": "2023-07-09T22:20:00+00:00",
       "author": {
         "@type": "Organization",
         "name": "Parallel EVM claim"
@@ -250,8 +250,8 @@
 <p>All examples start from the point that we received a DAG of transaction and the builder claims that transaction can be done in parallel. We want to execute those transactions in parallel and be sure that the claim is correct and that there are no inconsistencies (data races) that can happen.</p>
 <h3 id="example-1-simple-two-parallel-transactions">Example 1: simple two parallel transactions</h3>
 <p>We have two transactions that read/write to the <strong>same</strong> state (there is only one state that all of them share) and the update to that state is atomic. The example here is very simple but it allows us to set up some groundwork and initial ideas of what is checked.</p>
-<p><a href="https://mermaid.live/edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp">Mermaid graph</a></p>
 <p><img src="https://rakita.github.io/blog/blog/parallel-evm-claim/./example_2tx.png" alt="" /></p>
+<p><a href="https://mermaid.live/edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp">Graph</a></p>
 <p>For the sake of explaining we are simplifying state and seeing it as a list of accounts, these &quot;accounts&quot; can be a balance/nonce/code hash(code)/storage slot, it is just easier to reason and think about in simpler form.</p>
 <p>Additionally, we should consider both reads and writes of accounts as the same thing. This can be explored as a follow-up but for the first iteration, it is easier to omit this distinction. So this means that the transaction touched state consists of both reads and writes that this transaction did. And with this, having an account read from two different parallel transactions is considered invalid.</p>
 <p>Now, the idea here is that on every access of an account (read or write) to mark that account in the state as accessed by that transaction. This means that if account <code>0x01</code> is accessed by <code>tx1</code> it will be marked as such and if <code>tx2</code> tries to access account <code>0x1</code> we will notice that account is already marked and see that there is inconsistency and data race in place.</p>
@@ -271,10 +271,10 @@
 <p>The mechanism of marking the state works the same as in the first example. <code>tx5</code> can now access the account of the original or <code>tx1</code> or <code>tx2</code> accounts if it accessed the state of <code>tx3</code> or <code>tx3</code> this would make parallel claim invalid.</p>
 <h2 id="example-4-diamond-pattern">Example 4: Diamond pattern</h2>
 <p>This is a good example that tests our initial mechanism of marking of accessed state.</p>
-<p><a href="https://mermaid.live/edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg">Graph</a></p>
 <p><img src="https://rakita.github.io/blog/blog/parallel-evm-claim/./example_diamont.png" alt="" /></p>
+<p><a href="https://mermaid.live/edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg">Graph</a></p>
 <p>All previous statements should be valid here.</p>
-<p>For example <code>tx7</code> can only touch original state or <code>tx1</code>,<code>tx2</code>,<code>tx3</code>,<code>tx4</code>,<code>tx5</code> but not <code>tx6</code>, and same with <code>tx6</code> it can't touch state of <code>tx7</code></p>
+<p>For example <code>tx7</code> can only touch original state or <code>tx1</code>, <code>tx2</code>, <code>tx3</code>, <code>tx4</code>, <code>tx5</code> but not <code>tx6</code>, and same with <code>tx6</code> it can't touch state of <code>tx7</code></p>
 <h2 id="how-to-check-marks">How to check marks</h2>
 <p>Every transaction could have a list of previous dependent transactions, and when checking the mark inside the database we compare it if it is found inside that list.</p>
 <p>This list can be sorted so finding particular values can be done by binary search. The list size depends on the number of dependent transactions.</p>

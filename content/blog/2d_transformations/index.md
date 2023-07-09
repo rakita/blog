@@ -1,8 +1,8 @@
 +++
 title = "2D UI beginner guide. Learn to rotate/translate/scale"
 description = "2D UI beginner guide. Learn to rotate/translate/scale"
-date = 2022-04-20T09:19:42+00:00
-updated = 2020-04-20T09:19:42+00:00
+date = 2019-12-20T09:19:42+00:00
+updated = 2019-12-20T09:19:42+00:00
 draft = false
 template = "blog/page.html"
 
