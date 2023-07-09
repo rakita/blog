@@ -5,7 +5,7 @@ title = "Welcome to my blog!"
 # The homepage contents
 [extra]
 lead = 'I write about core blockchain ideas (mostly Ethereum) and rust.'
-url = "/docs/getting-started/introduction/"
+url = "/blog"
 url_button = "Get started"
 repo_version = "GitHub v0.1.0"
 repo_license = "Open-source MIT License."

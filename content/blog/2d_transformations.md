@@ -7,7 +7,7 @@ draft = false
 template = "blog/page.html"
 
 [taxonomies]
-authors = ["Public"]
+authors = ["draganrakita"]
 
 [extra]
 lead = "Post about 2d transformations that i did in my previous work life."
@@ -44,13 +44,13 @@ Rotation is little bit more complex (it has little bit more to do) but in same r
 
 And we come to scaling, it is best part of this post (it has pictures) :D. We will gradually introducing few things that needs to be done in scaling, we will see how we handle rotation, and shift controls (shift is usually used for aspect ration lock).
 
-![Naive Scale](./naive_scale.png)
+![Naive Scale](/2d_transformations/naive_scale.png)
 
 Nice, lets start with basic example where our element is not rotated or translated and we just want to scale it. We will use `ref_point` (corner or side usually), and its `anchor_point` and of course we will need `current_point` to tell us where we want to scale to. We calculate `diff=current_point-anchor_point`, get scale as `s=scale(diff/element_size)` and we are done, we have scale matrix that can add to our transformation.
 
 Okay, lets now look on example where we want to take top left corner `ref_point` ( you can follow picture below), in that case our `anchor_point` is positioned at bottom and if we want to scale it properly, to top and left. First difference from previous example is that we will need to move our object so that `anchor_point` is in `(0.0)` coordinate! We still need `diff` and we are calculating it same as before, but because now our axis are flipped, this is second difference, we need to reverse sign of `diff_new=Vector(-diff.x,-diff.y)`. Note, reversing `y` is needed for top side `ref_point` and reversing `x` for left side `ref_point`. We get scale as `s=scale(diff_new/element_size)` . And final third difference from previous example is that after all this we need to take translation of anchor `T=translate(anchor_point)`, calculate inverse `Tinv=inverse(T)` and bind it all together (from left to right) `S=T*s*Tin`.
 
-![Scale](./scale.png)
+![Scale](/2d_transformations/scale.png)
 
 As you can see diff vector is oriented to negative in reference to our axis, this is reason why we need to flip it, if we didn't do flipping you would get small scale when moving away from top left corner.
 
@@ -62,7 +62,7 @@ That's great, but how to append scale in current matrix, when scale is something
 
 Shift scale is scaling where aspect ration is not changed. This means that scale on both axis is equal and we need to choose which axis orientation we will take as primary. We could make it simple and depending on which corner_id is selected that take modulo of two and chose x or y scale, this will work but will be unintuitive. For better solution where depending on position of mouse relative to diagonal of element we will get smother transition between x and y orientation. See picture below:
 
-![Naive Scale](./shyft_scale.png)
+![Naive Scale](/2d_transformations/shyft_scale.png)
 
 With transparent colors we can see zones where we want to take only `x` ( blue color) or take only `y` (marked with red). As noticeable our object is in original position that means our `original_points` is calculated same as in example with rotated object. Slope of diagonals that make these zones are calculated from `original_size` with equation `line_slope = original_size.y/original_size.x` . for second diagonal it is enough to just flip sign and we will get second slope. what we want to check is if point is in blue or red space and we can do that following if statement: (for abbreviate: `op` is `original_point` , `ls` is `line_slope` ): `(op.y < ls**op.x && op.y > -ls**op.x) || (op.y > op.x**ls && op.y < -ls**op.x)`, and if this if statement is true do `scale.y=scale.x` if it is false do opposite. And lastly don't forget that when you are overriding one scale to not override its sign, in example from picture we are taking `y` scale and overriding `x` scale but we need to preserve `x` sign to properly scale our element `x=sign(x)*abs(y)`.
 
@@ -71,12 +71,12 @@ With transparent colors we can see zones where we want to take only `x` ( blue c
 Summary of functions that were called throughout the text:
 
 Translation:
-```text
+```rust
 M = M*translation(current_point-ref_point)
 ```
 
 Rotation:
-```text
+```rust
 crp  =ref_point - center_point
 ccp = current_point - center_point
 angle = atan2(norm(cross(crp,ccp)), dot(crp,ccp))
@@ -88,7 +88,7 @@ M = M*Ra
 ```
 
 Scale:
-```dwda
+```rust
 Minv = inverse(M)
 relative_position = Minv * current_position
 original_anchor_point = original_corners[handler_id]
@@ -102,7 +102,7 @@ M=M*Sa
 ```
 
 Shift scale:
-```dwda
+```rust
 scale = (x,y)
 line_slope = original_size.y/original_size.x
 if (op.y < ls**op.x && op.y > -ls**op.x) || (op.y > op.x**ls && op.y < -ls**op.x) {

@@ -12,6 +12,13 @@
   padding-left: 0.5rem;
 }
 
+// added to fit image inside the container
+.content img {
+  width: 100%;
+  height: 100%;
+}
+
+
 h1:hover a,
 h2:hover a,
 h3:hover a,
@@ -23,6 +30,7 @@ h4:hover a {
 .card-list {
   margin-top: 2.25rem;
 }
+
 
 .edit-page {
   margin-top: 3rem;
