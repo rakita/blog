@@ -11,7 +11,7 @@ authors = ["draganrakita"]
 +++
 
 
-This paper is not what you would expect, it is not about how to find the order and dependencies of transaction execution, as there are already a few approaches to this, first can be done with access lists (UTXO, Solana) and the main paper for the second approach is to brute force it with probabilistic execution aka [Block-STM](https://arxiv.org/abs/2203.06871) pioneered by Nova/Aptos, and some EVM type blockchain emulated this and gained good performance boost ([Polygon PoS](https://polygon.technology/blog/innovating-the-main-chain-a-polygon-pos-study-in-parallelization), [Binance Chain](https://www.bnbchain.org/tr/blog/new-milestone-the-implementation-of-parallel-evm-2-0/) both got similar performance).
+This post is not what you would expect, it is not about how to find the order and dependencies of transaction execution, as there are already a few approaches to this, first can be done with access lists (UTXO, Solana) and the main paper for the second approach is to brute force it with probabilistic execution aka [Block-STM](https://arxiv.org/abs/2203.06871) pioneered by Nova/Aptos, and some EVM type blockchain emulated this and gained good performance boost ([Polygon PoS](https://polygon.technology/blog/innovating-the-main-chain-a-polygon-pos-study-in-parallelization), [Binance Chain](https://www.bnbchain.org/tr/blog/new-milestone-the-implementation-of-parallel-evm-2-0/) both got similar performance).
 
 The idea is for the builder to (somehow) find the transactions that can be done in parallel (the great thing about this is that this can be considered as a black box and can evolve on its own) and share that claim in a form of the transaction [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph) to other peers/validators, the builder will be rewarded for doing that correctly. And verifier needs to execute those transactions in parallel following that DAG and **verify** the integrity of that claim. We will talk about how to verify this claim (Split of builder and verifier in imho is a very powerful idea that is a little bit undervalued allows us cleaner system modelling).
 
@@ -19,10 +19,9 @@ Until now I didn't find anything related to this and the topic seems a lot more 
 
 Parallel claim verification creates a potential path to introduce parallel execution inside Ethereum as the focus would be not on finding parallel tx but just on making sure that there are no inconsistencies when given tx are run in parallel. This path is long and requires more research to fully comprehend the change. As this topic is complex I will introduce a few simple examples and slowly build it up to encompass a working solution. But even with that, there are still a lot of pending topics that need to be addressed for this to become integrated inside protocol (parallel gas aka multidimensional gas accounting for example).
 
-# Algorith explained 
+# Algorithm explained 
 
 All examples start from the point that we received a DAG of transaction and the builder claims that transaction can be done in parallel. We want to execute those transactions in parallel and be sure that the claim is correct and that there are no inconsistencies (data races) that can happen.
-
 
 ### Example 1: simple two parallel transactions
 
