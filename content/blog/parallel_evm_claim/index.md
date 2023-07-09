@@ -30,7 +30,7 @@ We have two transactions that read/write to the **same** state (there is only on
 
 [Mermaid graph](https://mermaid.live/edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp)
 
-![](/parallel_evm_claim/example_2tx.png)
+![](./example_2tx.png)
 
 
 For the sake of explaining we are simplifying state and seeing it as a list of accounts, these "accounts" can be a balance/nonce/code hash(code)/storage slot, it is just easier to reason and think about in simpler form.
@@ -48,7 +48,7 @@ Running transactions in parallel is more implementation detail and will depend o
 
 The second example is having a third transaction that depends on the first one.
 
-![](/parallel_evm_claim/example_chain.png)
+![](./example_chain.png)
 
 
 [Graph](https://mermaid.live/edit#pako:eNpdjjEOwjAMRa8SeUTNQMuUgYmViZEwWI0LkZoEpU4Fqnp3DC1CwtPX-7b1JmiTIzAwMDIdPF4zBj3WNiqZ8-aitN4rfmwXIGEFzRc0K9j9n9RQQaAc0Dv5P71rC3yjQBaMREcdlp4t2DjLKhZOp2dswXAuVEG5u58RmA77QSg5zykfF-eP-vwC_v88KA)
@@ -61,7 +61,7 @@ This example show's us that marking of state can be done by chain ids that this 
 
 Modelling dependency can be tricky but in parallel execution, there are only two synchronizations that can happen. And those are forks and joins and both of them can be seen in the picture.
 
-![](/parallel_evm_claim/example_fork_join.png)
+![](./example_fork_join.png)
 
 
 [Graph](https://mermaid.live/edit#pako:eNpdj7EOwjAMRH-l8oiagRSWDEysTIwNg9W4EKlJUOogUNV_J9BWFXg6vTtZdwM0wRAo6BmZjhavEZ14SO2LfPXmUghxKPi5nUAWM6gWUM1g95_YL0D-gvWphBIcRYfW5AbDx9bAN3KkQWVpqMXUsQbtxxzFxOH88g0ojolKSHezdgbVYtdnSsZyiKdp1Xfc-AaEXkTp)
@@ -77,7 +77,7 @@ This is a good example that tests our initial mechanism of marking of accessed s
 
 [Graph](https://mermaid.live/edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg)
 
-![](/parallel_evm_claim/example_diamont.png)
+![](./example_diamont.png)
 
 
 All previous statements should be valid here.
