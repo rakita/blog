@@ -5,8 +5,108 @@
     <link href="https://rakita.github.io/blog/atom.xml" rel="self" type="application/atom+xml"/>
     <link href="https://rakita.github.io/blog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2023-07-09T22:20:00+00:00</updated>
+    <updated>2023-07-23T22:20:00+00:00</updated>
     <id>https://rakita.github.io/blog/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Zombie nodes of Ethereum</title>
+        <published>2023-07-23T22:20:00+00:00</published>
+        <updated>2023-07-23T22:20:00+00:00</updated>
+        <author>
+          <name>Unknown</name>
+        </author>
+        <link rel="alternate" href="https://rakita.github.io/blog/blog/zombie-nodes/" type="text/html"/>
+        <id>https://rakita.github.io/blog/blog/zombie-nodes/</id>
+        
+        <content type="html">&lt;p&gt;Let us begin with a question that made me start this whole blog post:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;What data the node would need to follow the chain tip?&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;And subquestion:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;How big of the disk would you need for that data?&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;And the name of this node will be the &lt;em&gt;&lt;strong&gt;Brain&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt; node (muhaaa)! Joking aside let&#x27;s dive in:&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;data&quot;&gt;Data&lt;&#x2F;h2&gt;
+&lt;p&gt;To answer the first question you would need&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;a plain state for executing new blocks&lt;&#x2F;li&gt;
+&lt;li&gt;Merkle tree to verify state root&lt;&#x2F;li&gt;
+&lt;li&gt;Little bit of history for the last 64blocks that are still not finalized, for block reorganization&lt;&#x2F;li&gt;
+&lt;li&gt;Logs related to validator deposits to feed it to CL (Consensus Layer) node. &lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;With this data, we would make a lean node and still be able to fully verify incoming blocks and sync with the CL node.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;disk-size&quot;&gt;Disk size&lt;&#x2F;h2&gt;
+&lt;p&gt;Here is the data on the full archive mainnet node on block #17694321 on 14.07.2023, gained by executing &lt;code&gt;.&#x2F;reth db stats&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;zombie-nodes&#x2F;.&#x2F;database.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The sizes of needed data are shown below:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;96.4gb&lt;&#x2F;code&gt; Plain state:
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;12.4gb&lt;&#x2F;code&gt; PlainAccountState&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;84gb&lt;&#x2F;code&gt; PlainStorageState&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;118gb&lt;&#x2F;code&gt; Merkle tree.
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;16.1gb&lt;&#x2F;code&gt; HashedAccount table&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;75.4gb&lt;&#x2F;code&gt; HashedStorage table&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;22.6gb&lt;&#x2F;code&gt; StorageTrie&lt;&#x2F;li&gt;
+&lt;li&gt;&lt;code&gt;3.9gb&lt;&#x2F;code&gt; AccountsTree&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;I don&#x27;t have the history size number for the last N blocks but it is in the range of a few gb. Will put it at 2GB.&lt;&#x2F;li&gt;
+&lt;li&gt;For deposit events I don&#x27;t have an exact number but for &lt;a href=&quot;https:&#x2F;&#x2F;etherscan.io&#x2F;txsBeaconDeposit&quot;&gt;856k deposit logs&lt;&#x2F;a&gt; it is around a few gigs, let&#x27;s say it is `2gb``. &lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;This would make the &lt;em&gt;&lt;strong&gt;Brain&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt; node size around &lt;strong&gt;218.4gb&lt;&#x2F;strong&gt; (what? just &lt;strong&gt;220gb&lt;&#x2F;strong&gt;?)&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;then-why-are-current-nodes-from-700gb-to-15tb&quot;&gt;Then why are current nodes from 700gb to 15tb?&lt;&#x2F;h1&gt;
+&lt;p&gt;It is complicated.&lt;&#x2F;p&gt;
+&lt;p&gt;If you want to sync your node from the genesis (zero block) you would need to fetch blocks from somewhere and this is currently embedded inside the Ethereum p2p protocol this means most nodes have all past blocks and this increases the size so our first type of zombie nodes is Block Zombie node, but I am going too far, let&#x27;s go over how do we get from &lt;code&gt;15tb&lt;&#x2F;code&gt; to &lt;code&gt;220gb&lt;&#x2F;code&gt; and various types of nodes found in present: &lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;Type1 ( old archive node): It contains everything that Ethereum has, those nodes are called archive nodes and from Etherscan OpenEthereum and Geth archive are around &lt;em&gt;&lt;strong&gt;15TB&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt; for the current tip. This kind of archive node became unusable, they need months to sync and are just big.&lt;&#x2F;li&gt;
+&lt;li&gt;Type2 (Erigon&#x2F;Reth archive node): Formating state a little bit differently and omitting history Merkle tries (present trie is still there) you shave a lot of data and you get Erigon&#x2F;Reth type archive node of &lt;em&gt;&lt;strong&gt;~2tb&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;Type3 (full node): If you remove &lt;em&gt;&lt;strong&gt;history state&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt; from the node you get &lt;em&gt;&lt;strong&gt;full&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt; node, this is currently what Geth&#x2F;Nethermind&#x2F;Besu defaults to, size goes to &lt;em&gt;&lt;strong&gt;700gb-1tb&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt;&lt;&#x2F;li&gt;
+&lt;li&gt;Type4 (brain node): If you shave history blocks and receipts you are getting that lean &lt;em&gt;&lt;strong&gt;Brain&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt; node of &lt;em&gt;&lt;strong&gt;200-300gb&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt;.
+&lt;ul&gt;
+&lt;li&gt;There is even an intermediate between type3 and type4 where only blocks after 11M are saved as this is the time when CL deposit logs start to appear.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;Just to note here if all nodes switch to type4 then type2 nodes would need to get blocks from somewhere else as in essence history blocks would be unavailable over p2p. Infrastructure for this is still not being made but some of the Ethereum nodes by default don&#x27;t save it. When infra gets made I assume in the future the main type of the node would be Type4.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;the-horde&quot;&gt;The Horde&lt;&#x2F;h1&gt;
+&lt;p&gt;The question that zombie nodes want to solve is why would you need &lt;strong&gt;1&#x2F;2tb&lt;&#x2F;strong&gt; NVMe SSD when you can get &lt;strong&gt;500gb&lt;&#x2F;strong&gt; and use a public repository for blocks and other data. It seems more logical. You can put your blocks to aws bucket or external disk, or if you need more resources you could clone parts of data to multiple servers, either way, it is more flexible.&lt;&#x2F;p&gt;
+&lt;p&gt;This would make running a node more approachable to new people and would allow Providers&#x2F;Researchers to run better suited types of the zombie node.&lt;&#x2F;p&gt;
+&lt;p&gt;Or maybe the user care only for a particular event of a particular contract and want to have the ability to filter it, or maybe you want to run a lot of transactions on the newest state (Researcher use case), or you want to move the history state to a different place (provider use case) as you want to clone it or not want to be exposed to bandwidth expensive transaction broadcast. There are a lot of small use cases like this as every group of users focuses on something different.&lt;&#x2F;p&gt;
+&lt;p&gt;Split have already happened with Consensus and Execution clients and imo I think the execution layer side needs to be split even more and this path seems unexplored (at least in the public).&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;zombie-types&quot;&gt;Zombie types&lt;&#x2F;h1&gt;
+&lt;p&gt;The brain would be the main driver that does consensus checks and would push state changes to the zombies, zombies would consume brain data by being subscribed to it and would update its internal state.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;code&gt;Zombies consuming Brains (data) :)&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;I am assuming some kind of streaming from the brain to other zombies is needed, so the brain executes blocks that are received from CL and streams new blocks and state changes to subscribed zombies.&lt;&#x2F;p&gt;
+&lt;p&gt;The problems here are the same as with CL and EL nodes, syncing and recovery become troublesome and they can get out of sync. For some of the zombie&#x27;s nodes recovery is possible and data can be requested again, but for others, it is not and we need to execute blocks again to get them. So zombie nodes if they want to recover data need other zombie nodes, and if out of sync some of them would require braind to resend all history outputs of execution.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;block-zombie-node&quot;&gt;Block zombie node&lt;&#x2F;h3&gt;
+&lt;p&gt;This is the first zombie that I am mentioning, it contains blocks (headers, bodies and receipts) and all of those data are checkable with just a hash.&lt;&#x2F;p&gt;
+&lt;p&gt;It will contain multiple things, &lt;strong&gt;~500gb&lt;&#x2F;strong&gt; of blocks, &lt;strong&gt;~200gb&lt;&#x2F;strong&gt; of receipts and around &lt;strong&gt;~200gb&lt;&#x2F;strong&gt; for senders and tx hashes index. If blocks&#x2F;receipts are available from Brain it will allow Brain to still respond to requests over the p2p network and maintain the same protocol that is presently used. The otherwise empty brain can use those blocks to do initial sync, it should be faster and more reliable.&lt;&#x2F;p&gt;
+&lt;p&gt;This node could have slow disks as it just needs to save blocks of data and it becomes a lot easier to cache things as we can perceive blocks as a blob of data that we need to save.&lt;&#x2F;p&gt;
+&lt;p&gt;The good thing is there could be one Block node and multiple Brain nodes, this would allow faster fetching of the blocks if the brain needs to initially sync. All brain nodes could push blocks to the Block zombie and the zombie would save them all (or the main chain that gets extended)&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;history-state-zombie-node&quot;&gt;History state zombie node&lt;&#x2F;h3&gt;
+&lt;p&gt;history state &lt;strong&gt;~900gb&lt;&#x2F;strong&gt; allows you to access the past state of Ethereum. At every block, you would be able to fetch the balance&#x2F;nonce&#x2F;code or storage of the account.&lt;&#x2F;p&gt;
+&lt;p&gt;The good thing about this is that we can add multiple indexes to the data and even create an index zombie node from it as we could map every change of the account.&lt;&#x2F;p&gt;
+&lt;p&gt;if you have a Block zombie node to get transactions you could use it to execute it and get transaction traces. It can be used to inspect past state both of accounts and storage.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;state-zombie-node&quot;&gt;State zombie node&lt;&#x2F;h3&gt;
+&lt;p&gt;Needed for MEV searchers and block builders that do a lot of simulations on the tip they emulate transactions to find the best block rewards or possible MEV, this is already done by a lot of people&#x2F;groups in space behind the doors and it should be fun to bring that more to the public.&lt;&#x2F;p&gt;
+&lt;p&gt;This node would need just the newest state that is around &lt;em&gt;&lt;strong&gt;~100gb&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;The use case of MEV and builders is different but they operate on the newest state so I just wanted to mention this type of node. Builders for example would need to state root from the Merkle trie but they can delegate that to the Brain node.&lt;&#x2F;p&gt;
+&lt;h3 id=&quot;some-future-experimental-zombie-nodes&quot;&gt;Some Future&#x2F;Experimental zombie nodes&lt;&#x2F;h3&gt;
+&lt;ul&gt;
+&lt;li&gt;Logs Zombie
+If you want to prune a lot of logs and save only ones that are of interest to you. Or have a custom indexer for it.&lt;&#x2F;li&gt;
+&lt;li&gt;State proof zombie
+With state expire already mentioned &lt;a href=&quot;https:&#x2F;&#x2F;notes.ethereum.org&#x2F;@vbuterin&#x2F;verkle_and_state_expiry_proposal&quot;&gt;few times&lt;&#x2F;a&gt; and something that is probably going to happen in &lt;a href=&quot;https:&#x2F;&#x2F;ethereum.org&#x2F;en&#x2F;roadmap&#x2F;statelessness&#x2F;#:~:text=State%20expiry%3A%20allow%20state%20data,without%20a%20local%20state%20database.&quot;&gt;future&lt;&#x2F;a&gt; (Hard to tell when) this will be additional type of nodes that would allow transitioning accounts from expired to present state&lt;&#x2F;li&gt;
+&lt;li&gt;Zombie aggregator
+Aggregate all streamable data from the brain (or multiple brains) that would allow populating other zombie nodes.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;And I assume there will be an even more variant.&lt;&#x2F;p&gt;
+&lt;h1 id=&quot;conclusion&quot;&gt;Conclusion&lt;&#x2F;h1&gt;
+&lt;p&gt;As the Ethereum state grows over time it becomes unusable, we need to mitigate this to slow down the growth until proper mechanisms are in place. Dropping of intermediate history Merkle trie&#x27;s was the first mitigation that was naturally done and the second wave that we see is the dropping of history blocks.&lt;&#x2F;p&gt;
+&lt;p&gt;In the end, presenting this as a zombie&#x2F;brain&#x2F;horde way was fun :) but the main ideas behind this post are half educational half exploratory, it is defining the execution node types that we already have (it is just about what data they possess), and that we can get even smaller execution nodes, and exploring the notion that having additional nodes&#x2F;zombies that bind to execution node can give us different interactions&#x2F;benefits in the ecosystem as not all data are made equal.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
     <entry xml:lang="en">
         <title>Parallel EVM claim</title>
         <published>2023-07-09T22:20:00+00:00</published>
