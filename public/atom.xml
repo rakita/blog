@@ -5,12 +5,12 @@
     <link href="https://rakita.github.io/blog/atom.xml" rel="self" type="application/atom+xml"/>
     <link href="https://rakita.github.io/blog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2023-07-23T22:20:00+00:00</updated>
+    <updated>2023-08-04T22:20:00+00:00</updated>
     <id>https://rakita.github.io/blog/atom.xml</id>
     <entry xml:lang="en">
         <title>Zombie nodes of Ethereum</title>
-        <published>2023-07-23T22:20:00+00:00</published>
-        <updated>2023-07-23T22:20:00+00:00</updated>
+        <published>2023-08-04T22:20:00+00:00</published>
+        <updated>2023-08-04T22:20:00+00:00</updated>
         <author>
           <name>Unknown</name>
         </author>
@@ -50,8 +50,8 @@
 &lt;li&gt;&lt;code&gt;3.9gb&lt;&#x2F;code&gt; AccountsTree&lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;&#x2F;li&gt;
-&lt;li&gt;I don&#x27;t have the history size number for the last N blocks but it is in the range of a few gb. Will put it at 2GB.&lt;&#x2F;li&gt;
-&lt;li&gt;For deposit events I don&#x27;t have an exact number but for &lt;a href=&quot;https:&#x2F;&#x2F;etherscan.io&#x2F;txsBeaconDeposit&quot;&gt;856k deposit logs&lt;&#x2F;a&gt; it is around a few gigs, let&#x27;s say it is `2gb``. &lt;&#x2F;li&gt;
+&lt;li&gt;I don&#x27;t have the history size number for the last N blocks but it is in the range of a few gb. Will put it at &lt;code&gt;2gb&lt;&#x2F;code&gt;.&lt;&#x2F;li&gt;
+&lt;li&gt;For deposit events I don&#x27;t have an exact number but for &lt;a href=&quot;https:&#x2F;&#x2F;etherscan.io&#x2F;txsBeaconDeposit&quot;&gt;856k deposit logs&lt;&#x2F;a&gt; it is around a few gigs, let&#x27;s say it is &lt;code&gt;2gb&lt;&#x2F;code&gt;. &lt;&#x2F;li&gt;
 &lt;&#x2F;ul&gt;
 &lt;p&gt;This would make the &lt;em&gt;&lt;strong&gt;Brain&lt;&#x2F;strong&gt;&lt;&#x2F;em&gt; node size around &lt;strong&gt;218.4gb&lt;&#x2F;strong&gt; (what? just &lt;strong&gt;220gb&lt;&#x2F;strong&gt;?)&lt;&#x2F;p&gt;
 &lt;h1 id=&quot;then-why-are-current-nodes-from-700gb-to-15tb&quot;&gt;Then why are current nodes from 700gb to 15tb?&lt;&#x2F;h1&gt;

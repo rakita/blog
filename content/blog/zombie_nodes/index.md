@@ -1,8 +1,8 @@
 +++
 title = "Zombie nodes of Ethereum"
-description = "What data the node would need to follow the chain tip? And various types of Ethereum nodes."
-date = 2023-07-23T22:20:00+00:00
-updated = 2023-07-23T22:20:00+00:00
+description = "What data the node would need to follow the chain tip? Is 220gb execution node possible in 2023?"
+date = 2023-08-04T22:20:00+00:00
+updated = 2023-08-04T22:20:00+00:00
 draft = false
 template = "blog/page.html"
 
@@ -18,9 +18,7 @@ And subquestion:
 
 `How big of the disk would you need for that data?`
 
-
 And the name of this node will be the ***Brain*** node (muhaaa)! Joking aside let's dive in:
-
 
 ## Data
 
@@ -48,8 +46,8 @@ The sizes of needed data are shown below:
     * `75.4gb` HashedStorage table
     * `22.6gb` StorageTrie
     * `3.9gb` AccountsTree
-* I don't have the history size number for the last N blocks but it is in the range of a few gb. Will put it at 2GB.
-* For deposit events I don't have an exact number but for [856k deposit logs](https://etherscan.io/txsBeaconDeposit) it is around a few gigs, let's say it is `2gb``. 
+* I don't have the history size number for the last N blocks but it is in the range of a few gb. Will put it at `2gb`.
+* For deposit events I don't have an exact number but for [856k deposit logs](https://etherscan.io/txsBeaconDeposit) it is around a few gigs, let's say it is `2gb`. 
 
 This would make the ***Brain*** node size around **218.4gb** (what? just **220gb**?)
 
