@@ -5,8 +5,132 @@
     <link rel="self" type="application/atom+xml" href="https://rakita.github.io/blog/atom.xml"/>
     <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2023-08-04T22:20:00+00:00</updated>
+    <updated>2024-06-09T12:00:00+00:00</updated>
     <id>https://rakita.github.io/blog/atom.xml</id>
+    <entry xml:lang="en">
+        <title>EOF Benefits</title>
+        <published>2024-06-09T12:00:00+00:00</published>
+        <updated>2024-06-06T12:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/eof-benefits/"/>
+        <id>https://rakita.github.io/blog/blog/eof-benefits/</id>
+        
+        <content type="html" xml:base="https://rakita.github.io/blog/blog/eof-benefits/">&lt;p&gt;EOF (EVM Object Format) is a group of small EIPs that improve EVM. It introduced a new format of the bytecode and prepares EVM for the future.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;benefits&quot;&gt;Benefits&lt;&#x2F;h2&gt;
+&lt;p&gt;The value of EOF turns out to be hard to explain as it is not one thing, and with its history of being delayed on multiple forks and development&#x2F;research that spaned for years and different versions across history, does not help with clarity.&lt;&#x2F;p&gt;
+&lt;p&gt;The intention of this post is to summarize the list of benefits and explain them in one sentence:&lt;&#x2F;p&gt;
+&lt;p&gt;Benefits:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;EOF allows opcode gas pricing changes.
+&lt;ul&gt;
+&lt;li&gt;If gas pricing changes, legacy bytecode could act differently.&lt;&#x2F;li&gt;
+&lt;li&gt;Removal of gas observability, means removal of the GAS opcode and removal of gas limit from CALL&#x2F;DELEGATECALL&#x2F;STATICCALL.&lt;&#x2F;li&gt;
+&lt;li&gt;Allows l2 to change gas depending on their use case. Example of hash being overpriced in zk l2. EIP-7667: Raise gas costs of hash functions  https:&#x2F;&#x2F;eips.ethereum.org&#x2F;EIPS&#x2F;eip-7667&lt;&#x2F;li&gt;
+&lt;li&gt;If present EOF was enabled before berlin, this EIP would not be needed and access list could be removed. https:&#x2F;&#x2F;eips.ethereum.org&#x2F;EIPS&#x2F;eip-2930 &lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Bytecode are smaller, and it reduces the gas usage
+&lt;ul&gt;
+&lt;li&gt;Early numbers show reduction in both the code&#x2F;initcode size and reduction in gas usage: https:&#x2F;&#x2F;notes.ethereum.org&#x2F;@ipsilon&#x2F;solidity_eof_poc&lt;&#x2F;li&gt;
+&lt;li&gt;Uniswap-v3 deployment 6.5% smaller initcode and 6.5% smaller deployed code &lt;&#x2F;li&gt;
+&lt;li&gt;deploy UniswapV3Factory take: ~14% less gas and call runTest : ~9% less gas.&lt;&#x2F;li&gt;
+&lt;li&gt;ENS DNSRegistrar deployment ~6% smaller initcode and ~1.5% smaller deployed code&lt;&#x2F;li&gt;
+&lt;li&gt;ENS call proveAndClaim: takes ~10% less gas for EOF.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;EOF allows bytecode transformations and upgradability.
+&lt;ul&gt;
+&lt;li&gt;Removal of code observability means removal of PC, CREATE&#x2F;CREATE2, EXTCODEHASH, EXTCODESIZE, EXTCODECOPY, CODESIZE, and CODECOPY opcodes.&lt;&#x2F;li&gt;
+&lt;li&gt;Legacy contracts would break if code is changed.&lt;&#x2F;li&gt;
+&lt;li&gt;This would allow us to mold EOF bytecode in any form when verkle comes.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;EOF enables opcode immediates
+&lt;ul&gt;
+&lt;li&gt;opens possibility of SWAPN, DUPN, and EXCHANGE opcodes&lt;&#x2F;li&gt;
+&lt;li&gt;This allows solidity more freedom on stack size. It removed stack too deep problem in solidity.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;EOF removes expensive jumpdest analysis
+&lt;ul&gt;
+&lt;li&gt;While in Reth, the analysis is saved with a bytecode, this is not case for other clients. The removal of jumpdest analysis before contract execution increases speed.&lt;&#x2F;li&gt;
+&lt;li&gt;With analysis removed we can in future increment max bytecode size.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Static analysis becomes easier
+&lt;ul&gt;
+&lt;li&gt;Subroutines enforce more structured control flow. This makes fuzzing more effective and linear-time static analysis possible.&lt;&#x2F;li&gt;
+&lt;li&gt;Data and code are separated and easier to reason about.&lt;&#x2F;li&gt;
+&lt;li&gt;EOF bytecode can be compiled to faster bytecode.&lt;&#x2F;li&gt;
+&lt;li&gt;EOF bytecode can be compiled to machine code.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Future proofing EVM
+&lt;ul&gt;
+&lt;li&gt;The version and structure of bytecode allow its extensibility. This is especially useful for L2 and standardization.&lt;&#x2F;li&gt;
+&lt;li&gt;One example of this is &lt;code&gt;EIP-7701: Native Account Abstraction with EOF&lt;&#x2F;code&gt; that adds new header section.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;Address space expansion.
+&lt;ul&gt;
+&lt;li&gt;New EXT*CALL opcodes prepare Ethereum for future address expansion by requiring for address field to be padded with zeros. When Ethereum do decide to extend address space EOF will have prepared those changes.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;h2 id=&quot;integration-with-current-evm&quot;&gt;Integration with current EVM&lt;&#x2F;h2&gt;
+&lt;p&gt;An important question for developers is the effort needed to implement the change, the cost of testing, and the cost of maintaining those opcodes.&lt;&#x2F;p&gt;
+&lt;p&gt;New opcodes do not clash with legacy opcodes, and EOF cause of verification does not touch deprecated opcodes.&lt;&#x2F;p&gt;
+&lt;p&gt;Encoding and decoding of EOF can be fuzzed. Validation is something new, around ~500 loc in Revm but has a lot of edge cases that need to be covered and need focus to do it right across the implementations.&lt;&#x2F;p&gt;
+&lt;p&gt;Creation TX is used as a carrier of EOF bytecode, it acts similar to EOFCREATE but requests validation before execution.&lt;&#x2F;p&gt;
+&lt;p&gt;Most opcodes are very simple:&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;EXTCALL&lt;&#x2F;code&gt; (0xf8), &lt;code&gt;EXTDELEGATECALL&lt;&#x2F;code&gt; (0xf9), &lt;code&gt;EXTSTATICCALL&lt;&#x2F;code&gt; (0xfb)
+&lt;ul&gt;
+&lt;li&gt;Have same blueprint as deprecated CALLs but with gas_limit and memory output fields removed.&lt;&#x2F;li&gt;
+&lt;li&gt;Before RETURNDATALOAD (introduced in a very early fork), the memory output of a CALL had to be set before doing a CALL opcode. This did not allow for dynamic outputs.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;EOFCREATE and RETURNCONTRACT
+&lt;ul&gt;
+&lt;li&gt;are new for EOF and require a special cases to be handled.&lt;&#x2F;li&gt;
+&lt;li&gt;EOFCREATE introduces new creation call. &lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;EXCHANGE (0xe8), SWAPN (0xe7), DUPN (0xe6), DATACOPY (0xd3), DATASIZE (0xd2), DATALOADN (0xd1), DATALOAD (0xd0), RJUMP (0xe0), RJUMPI (0xe1), RJUMPV (0xe2), RETURNDATALOAD 
+&lt;ul&gt;
+&lt;li&gt;Have simple logic and mostly require 10–20 lines per opcode to implement. Does not have a lot of edge cases that need to be covered.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;CALLF (0xe3), RETF (0xe4), and JUMPF (0xe5)
+&lt;ul&gt;
+&lt;li&gt;Require subroutine stack, and stack validation, those would require 20-30 loc as measure of complexity.&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;They require around 2&#x2F;3 months for one developer. Work on testing has already been started. There are currently around ~2000 handwritten tests for validation and work is beeing done on statetests.&lt;&#x2F;p&gt;
+&lt;p&gt;Changes are localized to the EVM, so integration with the rest of the client depends on the client architecture and where you would save bytecode.&lt;&#x2F;p&gt;
+&lt;p&gt;EXTCODESIZE and EXTCODEHASH need to be aware if the account is EOF or not and return a predefined value (size and hash of 0xEF00), this could slightly change how integration for the client can be done. One of ideas is to save is_eof flag inside plain accounts table to skip loading of the bytecode when any of EXTCODE type of opcodes are called.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;effect-on-l2&quot;&gt;Effect on L2&lt;&#x2F;h2&gt;
+&lt;p&gt;Biggest question that is asked is why don’t L2 implement this change? Should we close the EVM improvements on Ethereum L1?&lt;&#x2F;p&gt;
+&lt;p&gt;The reality is that L2 are not ready, and not just that, they do not have a platform that would help with integration of those innovations. Versioning of bytecode helps with that as it helps build that platform that L2 can use, removal of code observability helps mitigating upgredability issues, and gas changes help ZK L2 to remove the ddos vector of gas bombs (for example, a hash in zk is worth a lot more).&lt;&#x2F;p&gt;
+&lt;p&gt;More importantly, EOF is not just a format, it requires languages (solidity&#x2F;vyper&#x2F;huff) to be on board, and it requires tooling to support it so it can be usable. It requires an ecosystem to use it, and this format gives L2 more stability to innovate on top of it. &lt;&#x2F;p&gt;
+&lt;h2 id=&quot;downside-legacy-bytecode-still-exists&quot;&gt;Downside, legacy bytecode still exists&lt;&#x2F;h2&gt;
+&lt;p&gt;This is a question that is often asked. Legacy bytecode will always be here, if we don’t offer a alternative, we are going to be stuck with it. With alternative formated bytecodes, there is a future where we could transition and remove legacy bytecodes when state expire happens.&lt;&#x2F;p&gt;
+&lt;h2 id=&quot;in-the-end&quot;&gt;In the end&lt;&#x2F;h2&gt;
+&lt;p&gt;EOF is not the next big shiny thing, it is the maintenance EIP that fixes problems left from the initial EVM version  and there is no other way to solve those other than breaking it. It is necessary for further development and future proofing of EVM. &lt;&#x2F;p&gt;
+&lt;hr &#x2F;&gt;
+&lt;p&gt;Post was originally shared in &lt;a href=&quot;https:&#x2F;&#x2F;hackmd.io&#x2F;aZurva_kR2GQdOgJfS7B6A?view&quot;&gt;hackmd&lt;&#x2F;a&gt; form with Ethereum core devs. This was done a day before &lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;ethereum&#x2F;pm&#x2F;issues&#x2F;1052&quot;&gt;Execution Layer Meeting 189&lt;&#x2F;a&gt;. On that ACD call, clients officially included EOF in Prague hardfork.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
     <entry xml:lang="en">
         <title>Zombie nodes of Ethereum</title>
         <published>2023-08-04T22:20:00+00:00</published>
