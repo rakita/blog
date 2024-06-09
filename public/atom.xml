@@ -2,8 +2,8 @@
 <feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en">
     <title>draganrakita</title>
     <subtitle>Blog about core blockchain tech (mostly Ethereum) and rust</subtitle>
-    <link href="https://rakita.github.io/blog/atom.xml" rel="self" type="application/atom+xml"/>
-    <link href="https://rakita.github.io/blog/"/>
+    <link rel="self" type="application/atom+xml" href="https://rakita.github.io/blog/atom.xml"/>
+    <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
     <updated>2023-08-04T22:20:00+00:00</updated>
     <id>https://rakita.github.io/blog/atom.xml</id>
@@ -11,13 +11,19 @@
         <title>Zombie nodes of Ethereum</title>
         <published>2023-08-04T22:20:00+00:00</published>
         <updated>2023-08-04T22:20:00+00:00</updated>
+        
         <author>
-          <name>Unknown</name>
+          <name>
+            
+              Unknown
+            
+          </name>
         </author>
-        <link rel="alternate" href="https://rakita.github.io/blog/blog/zombie-nodes/" type="text/html"/>
+        
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/zombie-nodes/"/>
         <id>https://rakita.github.io/blog/blog/zombie-nodes/</id>
         
-        <content type="html">&lt;p&gt;Let us begin with a question that made me start this whole blog post:&lt;&#x2F;p&gt;
+        <content type="html" xml:base="https://rakita.github.io/blog/blog/zombie-nodes/">&lt;p&gt;Let us begin with a question that made me start this whole blog post:&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;code&gt;What data the node would need to follow the chain tip?&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;And subquestion:&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;code&gt;How big of the disk would you need for that data?&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
@@ -111,13 +117,19 @@ Aggregate all streamable data from the brain (or multiple brains) that would all
         <title>Parallel EVM claim</title>
         <published>2023-07-09T22:20:00+00:00</published>
         <updated>2023-07-09T22:20:00+00:00</updated>
+        
         <author>
-          <name>Unknown</name>
+          <name>
+            
+              Unknown
+            
+          </name>
         </author>
-        <link rel="alternate" href="https://rakita.github.io/blog/blog/parallel-evm-claim/" type="text/html"/>
+        
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/parallel-evm-claim/"/>
         <id>https://rakita.github.io/blog/blog/parallel-evm-claim/</id>
         
-        <content type="html">&lt;p&gt;This post is not what you would expect, it is not about how to find the order and dependencies of transaction execution, as there are already a few approaches to this, first can be done with access lists (UTXO, Solana) and the main paper for the second approach is to brute force it with probabilistic execution aka &lt;a href=&quot;https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2203.06871&quot;&gt;Block-STM&lt;&#x2F;a&gt; pioneered by Nova&#x2F;Aptos, and some EVM type blockchain emulated this and gained good performance boost (&lt;a href=&quot;https:&#x2F;&#x2F;polygon.technology&#x2F;blog&#x2F;innovating-the-main-chain-a-polygon-pos-study-in-parallelization&quot;&gt;Polygon PoS&lt;&#x2F;a&gt;, &lt;a href=&quot;https:&#x2F;&#x2F;www.bnbchain.org&#x2F;tr&#x2F;blog&#x2F;new-milestone-the-implementation-of-parallel-evm-2-0&#x2F;&quot;&gt;Binance Chain&lt;&#x2F;a&gt; both got similar performance).&lt;&#x2F;p&gt;
+        <content type="html" xml:base="https://rakita.github.io/blog/blog/parallel-evm-claim/">&lt;p&gt;This post is not what you would expect, it is not about how to find the order and dependencies of transaction execution, as there are already a few approaches to this, first can be done with access lists (UTXO, Solana) and the main paper for the second approach is to brute force it with probabilistic execution aka &lt;a href=&quot;https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2203.06871&quot;&gt;Block-STM&lt;&#x2F;a&gt; pioneered by Nova&#x2F;Aptos, and some EVM type blockchain emulated this and gained good performance boost (&lt;a href=&quot;https:&#x2F;&#x2F;polygon.technology&#x2F;blog&#x2F;innovating-the-main-chain-a-polygon-pos-study-in-parallelization&quot;&gt;Polygon PoS&lt;&#x2F;a&gt;, &lt;a href=&quot;https:&#x2F;&#x2F;www.bnbchain.org&#x2F;tr&#x2F;blog&#x2F;new-milestone-the-implementation-of-parallel-evm-2-0&#x2F;&quot;&gt;Binance Chain&lt;&#x2F;a&gt; both got similar performance).&lt;&#x2F;p&gt;
 &lt;p&gt;The idea is for the builder to (somehow) find the transactions that can be done in parallel (the great thing about this is that this can be considered as a black box and can evolve on its own) and share that claim in a form of the transaction &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Directed_acyclic_graph&quot;&gt;DAG&lt;&#x2F;a&gt; to other peers&#x2F;validators, the builder will be rewarded for doing that correctly. And verifier needs to execute those transactions in parallel following that DAG and &lt;strong&gt;verify&lt;&#x2F;strong&gt; the integrity of that claim. We will talk about how to verify this claim (Split of builder and verifier in imho is a very powerful idea that is a little bit undervalued allows us cleaner system modelling).&lt;&#x2F;p&gt;
 &lt;p&gt;Until now I didn&#x27;t find anything related to this and the topic seems a lot more interesting to explore. You don&#x27;t need to increase your transaction size with an access list and you don&#x27;t need to do expensive probabilistic execution (at least not for a lot of nodes), so verifiers have smaller work that they need to do but still fully consistently verify execution. And there is an additional benefit for archive sync that I will talk about later.&lt;&#x2F;p&gt;
 &lt;p&gt;Parallel claim verification creates a potential path to introduce parallel execution inside Ethereum as the focus would be not on finding parallel tx but just on making sure that there are no inconsistencies when given tx are run in parallel. This path is long and requires more research to fully comprehend the change. As this topic is complex I will introduce a few simple examples and slowly build it up to encompass a working solution. But even with that, there are still a lot of pending topics that need to be addressed for this to become integrated inside protocol (parallel gas aka multidimensional gas accounting for example).&lt;&#x2F;p&gt;
@@ -193,13 +205,19 @@ Aggregate all streamable data from the brain (or multiple brains) that would all
         <title>draganrakita</title>
         <published>2021-04-01T08:50:45+00:00</published>
         <updated>2021-04-01T08:50:45+00:00</updated>
+        
         <author>
-          <name>Unknown</name>
+          <name>
+            
+              Unknown
+            
+          </name>
         </author>
-        <link rel="alternate" href="https://rakita.github.io/blog/authors/draganrakita/" type="text/html"/>
+        
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/authors/draganrakita/"/>
         <id>https://rakita.github.io/blog/authors/draganrakita/</id>
         
-        <content type="html">&lt;p&gt;Creator of &lt;strong&gt;Blog&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
+        <content type="html" xml:base="https://rakita.github.io/blog/authors/draganrakita/">&lt;p&gt;Creator of &lt;strong&gt;Blog&lt;&#x2F;strong&gt;.&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;rakita&quot;&gt;@aaranxu&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 </content>
         
@@ -208,13 +226,19 @@ Aggregate all streamable data from the brain (or multiple brains) that would all
         <title>2D UI beginner guide. Learn to rotate&#x2F;translate&#x2F;scale</title>
         <published>2019-12-20T09:19:42+00:00</published>
         <updated>2019-12-20T09:19:42+00:00</updated>
+        
         <author>
-          <name>Unknown</name>
+          <name>
+            
+              Unknown
+            
+          </name>
         </author>
-        <link rel="alternate" href="https://rakita.github.io/blog/blog/2d-transformations/" type="text/html"/>
+        
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/2d-transformations/"/>
         <id>https://rakita.github.io/blog/blog/2d-transformations/</id>
         
-        <content type="html">&lt;p&gt;Recently I had pleasure to make UI for standard rotate&#x2F;scale&#x2F;translate controls on element with some bounding box. I told myself: great! this will be easy! Lets google it, make some matrices and this will be quickly finished... must say that it took me a bit longer. Internet didn&#x27;t help me with comprehensive solution or guide, I needed to stitch stuff together, and at the end of my frustration I got inspired to write this.&lt;&#x2F;p&gt;
+        <content type="html" xml:base="https://rakita.github.io/blog/blog/2d-transformations/">&lt;p&gt;Recently I had pleasure to make UI for standard rotate&#x2F;scale&#x2F;translate controls on element with some bounding box. I told myself: great! this will be easy! Lets google it, make some matrices and this will be quickly finished... must say that it took me a bit longer. Internet didn&#x27;t help me with comprehensive solution or guide, I needed to stitch stuff together, and at the end of my frustration I got inspired to write this.&lt;&#x2F;p&gt;
 &lt;p&gt;I will give small intro about rotation and translation because they can be easily implemented and will focus my attention to scaling that made me warm around my hearth (or maybe that was my frustration). At the end you can find TLDR section with aggregated functions that we call.&lt;&#x2F;p&gt;
 &lt;h1 id=&quot;transformations&quot;&gt;Transformations&lt;&#x2F;h1&gt;
 &lt;p&gt;Transformation for 2D is constituted of tree things: Rotation, Scaling and Translation and all three things can be represented with one 2x3 matrix (but because of conformity that matrix multiplication give us we add some zero padding and use 3x3). When thinking about matrix most of times I see only a black box, nothing more, I know what I can do with them, and avoid manually setting things. Most important things that we need to take care when matrixing is the order on how we do transformation, it matters, &lt;code&gt;Mfirst*Msecond&lt;&#x2F;code&gt; is not same as &lt;code&gt;Msecond*Mfirst&lt;&#x2F;code&gt; and it depends if we are using row or column major matrices.&lt;&#x2F;p&gt;

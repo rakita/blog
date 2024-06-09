@@ -50,6 +50,9 @@ github = "https://github.com/bluealloy"
 twitter = "https://twitter.com/rakitadragan"
 email = "dragan0rakita@gmail.com"
 
+# google analytics
+ganalytics = "G-TPLFNYY7E4"
+
 # If running on netlify.app site, set to true
 is_netlify = false
 
