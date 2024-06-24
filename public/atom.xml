@@ -5,8 +5,72 @@
     <link rel="self" type="application/atom+xml" href="https://rakita.github.io/blog/atom.xml"/>
     <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/"/>
     <generator uri="https://www.getzola.org/">Zola</generator>
-    <updated>2024-06-09T12:00:00+00:00</updated>
+    <updated>2024-06-25T12:00:00+00:00</updated>
     <id>https://rakita.github.io/blog/atom.xml</id>
+    <entry xml:lang="en">
+        <title>Revm Audit&#x2F;Fuzzing</title>
+        <published>2024-06-25T12:00:00+00:00</published>
+        <updated>2024-06-25T12:00:00+00:00</updated>
+        
+        <author>
+          <name>
+            
+              Unknown
+            
+          </name>
+        </author>
+        
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/005-revm-audit/"/>
+        <id>https://rakita.github.io/blog/blog/005-revm-audit/</id>
+        
+        <content type="html" xml:base="https://rakita.github.io/blog/blog/005-revm-audit/">&lt;p&gt;I am thrilled that this milestone has been reached!&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;github.com&#x2F;bluealloy&#x2F;revm&quot;&gt;Revm&lt;&#x2F;a&gt; is one of the leading EVMs in the Ethereum ecosystem. Many major projects and companies depend on it, and the number is growing, especially since the development of Reth. Revm has solidified its position as a foundational component of the Ethereum ecosystem, and its significance continues to rise.&lt;&#x2F;p&gt;
+&lt;p&gt;It is used by clients, block builders, tooling, and many searchers and hobbyists. Revm&#x27;s stability has been stellar and its execution consistent, leading to heavy reliance on it. Its speed and flexibility make it highly desirable for integration. With &lt;code&gt;no_std&lt;&#x2F;code&gt; support, it fits nicely in the zkVM world, where Rust is predominantly used. There are many requirements that Revm fulfills.&lt;&#x2F;p&gt;
+&lt;p&gt;There was already a lot of confidence in its consensus correctness, and bugs were squashed, which helped develop the client &lt;a href=&quot;https:&#x2F;&#x2F;reth.rs&quot;&gt;Reth&lt;&#x2F;a&gt; on top of it. We wanted to increase that confidence even further and have more assurance. The next step for this was an audit.&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;guidovranken.com&#x2F;&quot;&gt;Guido Vranken&lt;&#x2F;a&gt;, a top Ethereum &lt;a href=&quot;https:&#x2F;&#x2F;bounty.ethereum.org&quot;&gt;bug hunter&lt;&#x2F;a&gt;, was hired to stress test Revm. With his expertise in fuzzing and finding consensus bugs, it has been a pleasure to have him on board.&lt;&#x2F;p&gt;
+&lt;p&gt;Despite its already extensive usage, Guido managed to find a few undiscovered consensus issues and created a tool for fuzzing that we can reuse.&lt;&#x2F;p&gt;
+&lt;p&gt;When we discussed how to conduct the audit, the idea of involving others arose: &amp;quot;If there are multiple parties who rely on Revm, then it may make sense to have them co-fund it.&amp;quot;&amp;quot; So we did exactly that and made this audit community-driven and sponsored by six companies that use Revm in various ways.&lt;&#x2F;p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Paradigm&lt;&#x2F;strong&gt;
+Foundry, which Paradigm created, was started in the same month as Revm. After some time, the Foundry team switched to Revm, making it the first big project to use it.
+They were the first to see the potential and are a major reason for Revm&#x27;s popularity today.
+More than a year later, an idea was born to build Reth as there was already a working EVM. This is when I finally joined Paradigm, as I enjoyed working on client code.
+I am really grateful to Georgios and Paradigm for their support and for later hiring me to work on Reth and continue working on Revm. The Reth team is amazing, and it is my privilege to work with them!&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Ethereum Foundation&lt;&#x2F;strong&gt;
+We wouldn’t be here without Ethereum, so it made sense to include the Ethereum Foundation. After the audit of Revm and Reth is finished, Reth is scheduled to be included in the EF Bug Bounty along with its dependencies, so any bugs found within Revm that has an impact on the Ethereum network will be receiving rewards through the &lt;a href=&quot;https:&#x2F;&#x2F;bounty.ethereum.org&quot;&gt;Ethereum Foundation Bug Bounty Program&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Optimism&lt;&#x2F;strong&gt; 
+The Optimism stack and their team are amazing! Revm has support for Optimism changes, which made me think about the future of Revm and support for other EVM chains. The RetroPGF mechanism is a great way to incentivize builders to build even more.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Nomic Foundation&lt;&#x2F;strong&gt;
+he builders of Hardhat recently enabled their EDR (Ethereum Development Runtime) framework, which uses Revm at its core. They recognized Revm&#x27;s potential and started transitioning to it years ago.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Risc0&lt;&#x2F;strong&gt;
+Risc0 launched Zeth, their zkEVM system, which is leveraging Revm for execution. It is an awesome company that uses RISC-V for universal zk execution.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Taiko&lt;&#x2F;strong&gt;
+At one of the conferences, they approached me about Revm audit efforts and offered to help, so when the list was made, they were included. They care about the lower stack and are one of the first projects to make the &lt;a href=&quot;https:&#x2F;&#x2F;x.com&#x2F;taikoxyz&#x2F;status&#x2F;1755609928167981330?lang=en&quot;&gt;1% Pledge&lt;&#x2F;a&gt; for &lt;a href=&quot;https:&#x2F;&#x2F;protocol-guild.readthedocs.io&#x2F;en&#x2F;latest&#x2F;index.html&quot;&gt;Protocol Guild&lt;&#x2F;a&gt;. I appreciate their support.&lt;&#x2F;p&gt;
+&lt;&#x2F;li&gt;
+&lt;&#x2F;ul&gt;
+&lt;p&gt;There are many more projects that depend on Revm, and I am glad that this is the case, as it means the library is doing something good.&lt;&#x2F;p&gt;
+&lt;p&gt;This is a huge milestone for Revm and me. When I started the project, I didn&#x27;t imagine it would have such an impact on Ethereum. I appreciate the community, as without it, this would not be possible. I am committed to fulfilling the expectations and obligations of the users who depend on it.&lt;&#x2F;p&gt;
+&lt;p&gt;The work continues. The future is primarily focused on two things:&lt;&#x2F;p&gt;
+&lt;ol&gt;
+&lt;li&gt;The next hard fork that includes EOF (EVM Object Format)&lt;&#x2F;li&gt;
+&lt;li&gt;Revm endgame, but that is a topic for another post.&lt;&#x2F;li&gt;
+&lt;&#x2F;ol&gt;
+&lt;hr &#x2F;&gt;
+&lt;p&gt;Post was originally shared in &lt;a href=&quot;https:&#x2F;&#x2F;hackmd.io&#x2F;G7zazTX4TtekCnj6xlgctQ?view&quot;&gt;hackmd&lt;&#x2F;a&gt; and twitted &lt;a href=&quot;https:&#x2F;&#x2F;x.com&#x2F;rakitadragan&#x2F;status&#x2F;1803540273907245293&quot;&gt;here&lt;&#x2F;a&gt;.&lt;&#x2F;p&gt;
+</content>
+        
+    </entry>
     <entry xml:lang="en">
         <title>EOF Benefits</title>
         <published>2024-06-09T12:00:00+00:00</published>
@@ -20,10 +84,10 @@
           </name>
         </author>
         
-        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/eof-benefits/"/>
-        <id>https://rakita.github.io/blog/blog/eof-benefits/</id>
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/004-eof-benefits/"/>
+        <id>https://rakita.github.io/blog/blog/004-eof-benefits/</id>
         
-        <content type="html" xml:base="https://rakita.github.io/blog/blog/eof-benefits/">&lt;p&gt;EOF (EVM Object Format) is a group of small EIPs that improve EVM. It introduced a new format of the bytecode and prepares EVM for the future.&lt;&#x2F;p&gt;
+        <content type="html" xml:base="https://rakita.github.io/blog/blog/004-eof-benefits/">&lt;p&gt;EOF (EVM Object Format) is a group of small EIPs that improve EVM. It introduced a new format of the bytecode and prepares EVM for the future.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;benefits&quot;&gt;Benefits&lt;&#x2F;h2&gt;
 &lt;p&gt;The value of EOF turns out to be hard to explain as it is not one thing, and with its history of being delayed on multiple forks and development&#x2F;research that spaned for years and different versions across history, does not help with clarity.&lt;&#x2F;p&gt;
 &lt;p&gt;The intention of this post is to summarize the list of benefits and explain them in one sentence:&lt;&#x2F;p&gt;
@@ -144,10 +208,10 @@
           </name>
         </author>
         
-        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/zombie-nodes/"/>
-        <id>https://rakita.github.io/blog/blog/zombie-nodes/</id>
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/003-zombie-nodes/"/>
+        <id>https://rakita.github.io/blog/blog/003-zombie-nodes/</id>
         
-        <content type="html" xml:base="https://rakita.github.io/blog/blog/zombie-nodes/">&lt;p&gt;Let us begin with a question that made me start this whole blog post:&lt;&#x2F;p&gt;
+        <content type="html" xml:base="https://rakita.github.io/blog/blog/003-zombie-nodes/">&lt;p&gt;Let us begin with a question that made me start this whole blog post:&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;code&gt;What data the node would need to follow the chain tip?&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;And subquestion:&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;code&gt;How big of the disk would you need for that data?&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
@@ -163,7 +227,7 @@
 &lt;p&gt;With this data, we would make a lean node and still be able to fully verify incoming blocks and sync with the CL node.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;disk-size&quot;&gt;Disk size&lt;&#x2F;h2&gt;
 &lt;p&gt;Here is the data on the full archive mainnet node on block #17694321 on 14.07.2023, gained by executing &lt;code&gt;.&#x2F;reth db stats&lt;&#x2F;code&gt;:&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;zombie-nodes&#x2F;.&#x2F;database.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;003-zombie-nodes&#x2F;.&#x2F;database.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;The sizes of needed data are shown below:&lt;&#x2F;p&gt;
 &lt;ul&gt;
 &lt;li&gt;&lt;code&gt;96.4gb&lt;&#x2F;code&gt; Plain state:
@@ -250,10 +314,10 @@ Aggregate all streamable data from the brain (or multiple brains) that would all
           </name>
         </author>
         
-        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/parallel-evm-claim/"/>
-        <id>https://rakita.github.io/blog/blog/parallel-evm-claim/</id>
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/002-parallel-evm-claim/"/>
+        <id>https://rakita.github.io/blog/blog/002-parallel-evm-claim/</id>
         
-        <content type="html" xml:base="https://rakita.github.io/blog/blog/parallel-evm-claim/">&lt;p&gt;This post is not what you would expect, it is not about how to find the order and dependencies of transaction execution, as there are already a few approaches to this, first can be done with access lists (UTXO, Solana) and the main paper for the second approach is to brute force it with probabilistic execution aka &lt;a href=&quot;https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2203.06871&quot;&gt;Block-STM&lt;&#x2F;a&gt; pioneered by Nova&#x2F;Aptos, and some EVM type blockchain emulated this and gained good performance boost (&lt;a href=&quot;https:&#x2F;&#x2F;polygon.technology&#x2F;blog&#x2F;innovating-the-main-chain-a-polygon-pos-study-in-parallelization&quot;&gt;Polygon PoS&lt;&#x2F;a&gt;, &lt;a href=&quot;https:&#x2F;&#x2F;www.bnbchain.org&#x2F;tr&#x2F;blog&#x2F;new-milestone-the-implementation-of-parallel-evm-2-0&#x2F;&quot;&gt;Binance Chain&lt;&#x2F;a&gt; both got similar performance).&lt;&#x2F;p&gt;
+        <content type="html" xml:base="https://rakita.github.io/blog/blog/002-parallel-evm-claim/">&lt;p&gt;This post is not what you would expect, it is not about how to find the order and dependencies of transaction execution, as there are already a few approaches to this, first can be done with access lists (UTXO, Solana) and the main paper for the second approach is to brute force it with probabilistic execution aka &lt;a href=&quot;https:&#x2F;&#x2F;arxiv.org&#x2F;abs&#x2F;2203.06871&quot;&gt;Block-STM&lt;&#x2F;a&gt; pioneered by Nova&#x2F;Aptos, and some EVM type blockchain emulated this and gained good performance boost (&lt;a href=&quot;https:&#x2F;&#x2F;polygon.technology&#x2F;blog&#x2F;innovating-the-main-chain-a-polygon-pos-study-in-parallelization&quot;&gt;Polygon PoS&lt;&#x2F;a&gt;, &lt;a href=&quot;https:&#x2F;&#x2F;www.bnbchain.org&#x2F;tr&#x2F;blog&#x2F;new-milestone-the-implementation-of-parallel-evm-2-0&#x2F;&quot;&gt;Binance Chain&lt;&#x2F;a&gt; both got similar performance).&lt;&#x2F;p&gt;
 &lt;p&gt;The idea is for the builder to (somehow) find the transactions that can be done in parallel (the great thing about this is that this can be considered as a black box and can evolve on its own) and share that claim in a form of the transaction &lt;a href=&quot;https:&#x2F;&#x2F;en.wikipedia.org&#x2F;wiki&#x2F;Directed_acyclic_graph&quot;&gt;DAG&lt;&#x2F;a&gt; to other peers&#x2F;validators, the builder will be rewarded for doing that correctly. And verifier needs to execute those transactions in parallel following that DAG and &lt;strong&gt;verify&lt;&#x2F;strong&gt; the integrity of that claim. We will talk about how to verify this claim (Split of builder and verifier in imho is a very powerful idea that is a little bit undervalued allows us cleaner system modelling).&lt;&#x2F;p&gt;
 &lt;p&gt;Until now I didn&#x27;t find anything related to this and the topic seems a lot more interesting to explore. You don&#x27;t need to increase your transaction size with an access list and you don&#x27;t need to do expensive probabilistic execution (at least not for a lot of nodes), so verifiers have smaller work that they need to do but still fully consistently verify execution. And there is an additional benefit for archive sync that I will talk about later.&lt;&#x2F;p&gt;
 &lt;p&gt;Parallel claim verification creates a potential path to introduce parallel execution inside Ethereum as the focus would be not on finding parallel tx but just on making sure that there are no inconsistencies when given tx are run in parallel. This path is long and requires more research to fully comprehend the change. As this topic is complex I will introduce a few simple examples and slowly build it up to encompass a working solution. But even with that, there are still a lot of pending topics that need to be addressed for this to become integrated inside protocol (parallel gas aka multidimensional gas accounting for example).&lt;&#x2F;p&gt;
@@ -261,7 +325,7 @@ Aggregate all streamable data from the brain (or multiple brains) that would all
 &lt;p&gt;All examples start from the point that we received a DAG of transaction and the builder claims that transaction can be done in parallel. We want to execute those transactions in parallel and be sure that the claim is correct and that there are no inconsistencies (data races) that can happen.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;example-1-simple-two-parallel-transactions&quot;&gt;Example 1: simple two parallel transactions&lt;&#x2F;h3&gt;
 &lt;p&gt;We have two transactions that read&#x2F;write to the &lt;strong&gt;same&lt;&#x2F;strong&gt; state (there is only one state that all of them share) and the update to that state is atomic. The example here is very simple but it allows us to set up some groundwork and initial ideas of what is checked.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;parallel-evm-claim&#x2F;.&#x2F;example_2tx.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;002-parallel-evm-claim&#x2F;.&#x2F;example_2tx.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;For the sake of explaining we are simplifying state and seeing it as a list of accounts, these &amp;quot;accounts&amp;quot; can be a balance&#x2F;nonce&#x2F;code hash(code)&#x2F;storage slot, it is just easier to reason and think about in simpler form.&lt;&#x2F;p&gt;
 &lt;p&gt;Additionally, we should consider both reads and writes of accounts as the same thing. This can be explored as a follow-up but for the first iteration, it is easier to omit this distinction. So this means that the transaction touched state consists of both reads and writes that this transaction did. And with this, having an account read from two different parallel transactions is considered invalid.&lt;&#x2F;p&gt;
@@ -270,19 +334,19 @@ Aggregate all streamable data from the brain (or multiple brains) that would all
 &lt;p&gt;Running transactions in parallel is more implementation detail and will depend on the programming language.&lt;&#x2F;p&gt;
 &lt;h3 id=&quot;example-2-chains-transactions-dependencies&quot;&gt;Example 2: Chains, transactions dependencies.&lt;&#x2F;h3&gt;
 &lt;p&gt;The second example is having a third transaction that depends on the first one.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;parallel-evm-claim&#x2F;.&#x2F;example_chain.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;002-parallel-evm-claim&#x2F;.&#x2F;example_chain.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpdjjEOwjAMRa8SeUTNQMuUgYmViZEwWI0LkZoEpU4Fqnp3DC1CwtPX-7b1JmiTIzAwMDIdPF4zBj3WNiqZ8-aitN4rfmwXIGEFzRc0K9j9n9RQQaAc0Dv5P71rC3yjQBaMREcdlp4t2DjLKhZOp2dswXAuVEG5u58RmA77QSg5zykfF-eP-vwC_v88KA&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;This is the first example of dependent transactions and&lt;code&gt;tx3&lt;&#x2F;code&gt; can access only accounts that are in the original state or touched by &lt;code&gt;tx1&lt;&#x2F;code&gt;, if both &lt;code&gt;tx3&lt;&#x2F;code&gt; and &lt;code&gt;tx2&lt;&#x2F;code&gt; access the same account this would make the parallelism claim invalid.&lt;&#x2F;p&gt;
 &lt;p&gt;This example show&#x27;s us that marking of state can be done by chain ids that this tx belongs to and we would get the same outcome. Without this &lt;code&gt;tx4&lt;&#x2F;code&gt; would need to check if the account state is original or marked by &lt;code&gt;tx1&lt;&#x2F;code&gt; or marked by &lt;code&gt;tx3&lt;&#x2F;code&gt; and that wouldn&#x27;t be efficient. I will use the terms chain and transaction interchangeably.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;example-3-chain-forks-and-joins&quot;&gt;Example 3: Chain forks and joins&lt;&#x2F;h2&gt;
 &lt;p&gt;Modelling dependency can be tricky but in parallel execution, there are only two synchronizations that can happen. And those are forks and joins and both of them can be seen in the picture.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;parallel-evm-claim&#x2F;.&#x2F;example_fork_join.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;002-parallel-evm-claim&#x2F;.&#x2F;example_fork_join.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpdj7EOwjAMRH-l8oiagRSWDEysTIwNg9W4EKlJUOogUNV_J9BWFXg6vTtZdwM0wRAo6BmZjhavEZ14SO2LfPXmUghxKPi5nUAWM6gWUM1g95_YL0D-gvWphBIcRYfW5AbDx9bAN3KkQWVpqMXUsQbtxxzFxOH88g0ojolKSHezdgbVYtdnSsZyiKdp1Xfc-AaEXkTp&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;There is one fork here, and can be seen in the example of &lt;code&gt;tx1&lt;&#x2F;code&gt; that forks its state to chains of &lt;code&gt;tx5&lt;&#x2F;code&gt; and &lt;code&gt;tx3&lt;&#x2F;code&gt;. This means that there is a dependency between &lt;code&gt;tx5&lt;&#x2F;code&gt; and &lt;code&gt;tx1&lt;&#x2F;code&gt;, &lt;code&gt;tx3&lt;&#x2F;code&gt; and &lt;code&gt;tx1&lt;&#x2F;code&gt; but there are no dependencies on &lt;code&gt;tx3&lt;&#x2F;code&gt; and &lt;code&gt;tx5&lt;&#x2F;code&gt; and they can be run in parallel.&lt;&#x2F;p&gt;
 &lt;p&gt;The mechanism of marking the state works the same as in the first example. &lt;code&gt;tx5&lt;&#x2F;code&gt; can now access the account of the original or &lt;code&gt;tx1&lt;&#x2F;code&gt; or &lt;code&gt;tx2&lt;&#x2F;code&gt; accounts if it accessed the state of &lt;code&gt;tx3&lt;&#x2F;code&gt; or &lt;code&gt;tx3&lt;&#x2F;code&gt; this would make parallel claim invalid.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;example-4-diamond-pattern&quot;&gt;Example 4: Diamond pattern&lt;&#x2F;h2&gt;
 &lt;p&gt;This is a good example that tests our initial mechanism of marking of accessed state.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;parallel-evm-claim&#x2F;.&#x2F;example_diamont.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;002-parallel-evm-claim&#x2F;.&#x2F;example_diamont.png&quot; alt=&quot;&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;&lt;a href=&quot;https:&#x2F;&#x2F;mermaid.live&#x2F;edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg&quot;&gt;Graph&lt;&#x2F;a&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;All previous statements should be valid here.&lt;&#x2F;p&gt;
 &lt;p&gt;For example &lt;code&gt;tx7&lt;&#x2F;code&gt; can only touch original state or &lt;code&gt;tx1&lt;&#x2F;code&gt;, &lt;code&gt;tx2&lt;&#x2F;code&gt;, &lt;code&gt;tx3&lt;&#x2F;code&gt;, &lt;code&gt;tx4&lt;&#x2F;code&gt;, &lt;code&gt;tx5&lt;&#x2F;code&gt; but not &lt;code&gt;tx6&lt;&#x2F;code&gt;, and same with &lt;code&gt;tx6&lt;&#x2F;code&gt; it can&#x27;t touch state of &lt;code&gt;tx7&lt;&#x2F;code&gt;&lt;&#x2F;p&gt;
@@ -359,10 +423,10 @@ Aggregate all streamable data from the brain (or multiple brains) that would all
           </name>
         </author>
         
-        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/2d-transformations/"/>
-        <id>https://rakita.github.io/blog/blog/2d-transformations/</id>
+        <link rel="alternate" type="text/html" href="https://rakita.github.io/blog/blog/001-2d-transformations/"/>
+        <id>https://rakita.github.io/blog/blog/001-2d-transformations/</id>
         
-        <content type="html" xml:base="https://rakita.github.io/blog/blog/2d-transformations/">&lt;p&gt;Recently I had pleasure to make UI for standard rotate&#x2F;scale&#x2F;translate controls on element with some bounding box. I told myself: great! this will be easy! Lets google it, make some matrices and this will be quickly finished... must say that it took me a bit longer. Internet didn&#x27;t help me with comprehensive solution or guide, I needed to stitch stuff together, and at the end of my frustration I got inspired to write this.&lt;&#x2F;p&gt;
+        <content type="html" xml:base="https://rakita.github.io/blog/blog/001-2d-transformations/">&lt;p&gt;Recently I had pleasure to make UI for standard rotate&#x2F;scale&#x2F;translate controls on element with some bounding box. I told myself: great! this will be easy! Lets google it, make some matrices and this will be quickly finished... must say that it took me a bit longer. Internet didn&#x27;t help me with comprehensive solution or guide, I needed to stitch stuff together, and at the end of my frustration I got inspired to write this.&lt;&#x2F;p&gt;
 &lt;p&gt;I will give small intro about rotation and translation because they can be easily implemented and will focus my attention to scaling that made me warm around my hearth (or maybe that was my frustration). At the end you can find TLDR section with aggregated functions that we call.&lt;&#x2F;p&gt;
 &lt;h1 id=&quot;transformations&quot;&gt;Transformations&lt;&#x2F;h1&gt;
 &lt;p&gt;Transformation for 2D is constituted of tree things: Rotation, Scaling and Translation and all three things can be represented with one 2x3 matrix (but because of conformity that matrix multiplication give us we add some zero padding and use 3x3). When thinking about matrix most of times I see only a black box, nothing more, I know what I can do with them, and avoid manually setting things. Most important things that we need to take care when matrixing is the order on how we do transformation, it matters, &lt;code&gt;Mfirst*Msecond&lt;&#x2F;code&gt; is not same as &lt;code&gt;Msecond*Mfirst&lt;&#x2F;code&gt; and it depends if we are using row or column major matrices.&lt;&#x2F;p&gt;
@@ -382,16 +446,16 @@ Aggregate all streamable data from the brain (or multiple brains) that would all
 &lt;p&gt;Rotation is little bit more complex (it has little bit more to do) but in same rank as translation. We need reference point &lt;code&gt;ref_point&lt;&#x2F;code&gt; for selected element. Rotation is usually, not to say always, done around element center, for this we need &lt;code&gt;center_point&lt;&#x2F;code&gt;. And lastly we have &lt;code&gt;current_point&lt;&#x2F;code&gt;. As you can guest we need to find the angle between these two vectors &lt;code&gt;x=ref_point-center_point&lt;&#x2F;code&gt; and &lt;code&gt;y=current_point-center_point&lt;&#x2F;code&gt;. After consulting internet we get this equation:&lt;code&gt;angle = atan2(norm(cross(x,y)), dot(x,y))&lt;&#x2F;code&gt;. With angle found we can call function for creating matrix, something like &lt;code&gt;R=rotation(angle)&lt;&#x2F;code&gt;. Appending &lt;code&gt;R&lt;&#x2F;code&gt; to transformation matrix &lt;code&gt;M&lt;&#x2F;code&gt; is done with this simple but very used and important trick: We create another matrix of translation from elements center &lt;code&gt;T=translation(center_point)&lt;&#x2F;code&gt;, and it&#x27;s inverse&lt;code&gt;Tinv = inverse(T)&lt;&#x2F;code&gt;. We get matrix that we can use to append transformation to already present points &lt;code&gt;Ra = Tinv*R*T&lt;&#x2F;code&gt; and final transformation is &lt;code&gt;M=M*Ra&lt;&#x2F;code&gt;. Basically (with &lt;code&gt;Tinv&lt;&#x2F;code&gt; we just nullify translation, we then rotate our element around center and apply T to put it back into old position).&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;scale&quot;&gt;Scale&lt;&#x2F;h2&gt;
 &lt;p&gt;And we come to scaling, it is best part of this post (it has pictures) :D. We will gradually introducing few things that needs to be done in scaling, we will see how we handle rotation, and shift controls (shift is usually used for aspect ration lock).&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;2d-transformations&#x2F;.&#x2F;naive_scale.png&quot; alt=&quot;Naive Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;001-2d-transformations&#x2F;.&#x2F;naive_scale.png&quot; alt=&quot;Naive Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;Nice, lets start with basic example where our element is not rotated or translated and we just want to scale it. We will use &lt;code&gt;ref_point&lt;&#x2F;code&gt; (corner or side usually), and its &lt;code&gt;anchor_point&lt;&#x2F;code&gt; and of course we will need &lt;code&gt;current_point&lt;&#x2F;code&gt; to tell us where we want to scale to. We calculate &lt;code&gt;diff=current_point-anchor_point&lt;&#x2F;code&gt;, get scale as &lt;code&gt;s=scale(diff&#x2F;element_size)&lt;&#x2F;code&gt; and we are done, we have scale matrix that can add to our transformation.&lt;&#x2F;p&gt;
 &lt;p&gt;Okay, lets now look on example where we want to take top left corner &lt;code&gt;ref_point&lt;&#x2F;code&gt; ( you can follow picture below), in that case our &lt;code&gt;anchor_point&lt;&#x2F;code&gt; is positioned at bottom and if we want to scale it properly, to top and left. First difference from previous example is that we will need to move our object so that &lt;code&gt;anchor_point&lt;&#x2F;code&gt; is in &lt;code&gt;(0.0)&lt;&#x2F;code&gt; coordinate! We still need &lt;code&gt;diff&lt;&#x2F;code&gt; and we are calculating it same as before, but because now our axis are flipped, this is second difference, we need to reverse sign of &lt;code&gt;diff_new=Vector(-diff.x,-diff.y)&lt;&#x2F;code&gt;. Note, reversing &lt;code&gt;y&lt;&#x2F;code&gt; is needed for top side &lt;code&gt;ref_point&lt;&#x2F;code&gt; and reversing &lt;code&gt;x&lt;&#x2F;code&gt; for left side &lt;code&gt;ref_point&lt;&#x2F;code&gt;. We get scale as &lt;code&gt;s=scale(diff_new&#x2F;element_size)&lt;&#x2F;code&gt; . And final third difference from previous example is that after all this we need to take translation of anchor &lt;code&gt;T=translate(anchor_point)&lt;&#x2F;code&gt;, calculate inverse &lt;code&gt;Tinv=inverse(T)&lt;&#x2F;code&gt; and bind it all together (from left to right) &lt;code&gt;S=T*s*Tin&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;2d-transformations&#x2F;.&#x2F;scale.png&quot; alt=&quot;Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;001-2d-transformations&#x2F;.&#x2F;scale.png&quot; alt=&quot;Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;As you can see diff vector is oriented to negative in reference to our axis, this is reason why we need to flip it, if we didn&#x27;t do flipping you would get small scale when moving away from top left corner.&lt;&#x2F;p&gt;
 &lt;p&gt;This will all work just fine if element is not in any way rotated (Yey rotation!), with rotation we are now in bind how to calculate our diff and extract scale information. But, don&#x27;t despair, we can use same trick as we did with rotation in a way that we will take &lt;code&gt;current_position&lt;&#x2F;code&gt; and inverse of current transformation matrix &lt;code&gt;Minv = inverse(M)&lt;&#x2F;code&gt; and get &lt;code&gt;relative_position=Minv*current_position&lt;&#x2F;code&gt;. Relative position now presents point relative to our &lt;strong&gt;original&lt;&#x2F;strong&gt; element. We get corner of original element as: &lt;code&gt;original_anchor_point=original_corners[handler_id]&lt;&#x2F;code&gt; (take care to select correct corner, it is probably jumbled up with rotation, I had something like &lt;code&gt;handler_id&lt;&#x2F;code&gt; to help me with that) and do same as we did in our last example, calculate diff as &lt;code&gt;diff=relative_position-original_corners[handler_id]&lt;&#x2F;code&gt;, and if needed invert its axis. Calculate scale as &lt;code&gt;s=scale(diff_new&#x2F;element_original_size)&lt;&#x2F;code&gt; and now similarly as previous scale example we need to move our original element to anchor before we do scaling, bear in mind that that translation represent anchor when our element is &lt;strong&gt;not&lt;&#x2F;strong&gt; transformation. We get &lt;code&gt;T=translate(original_anchor_point)&lt;&#x2F;code&gt; and its inverse &lt;code&gt;Tinv&lt;&#x2F;code&gt; and we get &lt;code&gt;S=T*s*Tinv&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;p&gt;That&#x27;s great, but how to append scale in current matrix, when scale is something that is done before rotation and translation? We could always prepend scale to &lt;code&gt;M&lt;&#x2F;code&gt;, and this is only way to properly add scale, mostly because we are using &lt;code&gt;S*R*T&lt;&#x2F;code&gt; order. But how to get matrix to apply directly on already transformed points? Hah, just take &lt;code&gt;Minv = inverse(M)&lt;&#x2F;code&gt; and get transformation that we can append on present points as &lt;code&gt;Sa=Minv*S*M&lt;&#x2F;code&gt;, and final matrix is &lt;code&gt;M=M*Sa&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;shift-scale&quot;&gt;Shift scale&lt;&#x2F;h2&gt;
 &lt;p&gt;Shift scale is scaling where aspect ration is not changed. This means that scale on both axis is equal and we need to choose which axis orientation we will take as primary. We could make it simple and depending on which corner_id is selected that take modulo of two and chose x or y scale, this will work but will be unintuitive. For better solution where depending on position of mouse relative to diagonal of element we will get smother transition between x and y orientation. See picture below:&lt;&#x2F;p&gt;
-&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;2d-transformations&#x2F;.&#x2F;shyft_scale.png&quot; alt=&quot;Naive Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
+&lt;p&gt;&lt;img src=&quot;https:&#x2F;&#x2F;rakita.github.io&#x2F;blog&#x2F;blog&#x2F;001-2d-transformations&#x2F;.&#x2F;shyft_scale.png&quot; alt=&quot;Naive Scale&quot; &#x2F;&gt;&lt;&#x2F;p&gt;
 &lt;p&gt;With transparent colors we can see zones where we want to take only &lt;code&gt;x&lt;&#x2F;code&gt; ( blue color) or take only &lt;code&gt;y&lt;&#x2F;code&gt; (marked with red). As noticeable our object is in original position that means our &lt;code&gt;original_points&lt;&#x2F;code&gt; is calculated same as in example with rotated object. Slope of diagonals that make these zones are calculated from &lt;code&gt;original_size&lt;&#x2F;code&gt; with equation &lt;code&gt;line_slope = original_size.y&#x2F;original_size.x&lt;&#x2F;code&gt; . for second diagonal it is enough to just flip sign and we will get second slope. what we want to check is if point is in blue or red space and we can do that following if statement: (for abbreviate: &lt;code&gt;op&lt;&#x2F;code&gt; is &lt;code&gt;original_point&lt;&#x2F;code&gt; , &lt;code&gt;ls&lt;&#x2F;code&gt; is &lt;code&gt;line_slope&lt;&#x2F;code&gt; ): &lt;code&gt;(op.y &amp;lt; ls**op.x &amp;amp;&amp;amp; op.y &amp;gt; -ls**op.x) || (op.y &amp;gt; op.x**ls &amp;amp;&amp;amp; op.y &amp;lt; -ls**op.x)&lt;&#x2F;code&gt;, and if this if statement is true do &lt;code&gt;scale.y=scale.x&lt;&#x2F;code&gt; if it is false do opposite. And lastly don&#x27;t forget that when you are overriding one scale to not override its sign, in example from picture we are taking &lt;code&gt;y&lt;&#x2F;code&gt; scale and overriding &lt;code&gt;x&lt;&#x2F;code&gt; scale but we need to preserve &lt;code&gt;x&lt;&#x2F;code&gt; sign to properly scale our element &lt;code&gt;x=sign(x)*abs(y)&lt;&#x2F;code&gt;.&lt;&#x2F;p&gt;
 &lt;h2 id=&quot;tldr&quot;&gt;TLDR&lt;&#x2F;h2&gt;
 &lt;p&gt;Summary of functions that were called throughout the text:&lt;&#x2F;p&gt;

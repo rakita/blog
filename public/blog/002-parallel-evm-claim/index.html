@@ -51,7 +51,7 @@
 
 <title>Parallel EVM claim | draganrakita</title>
 <meta name="description" content="How to verify claim of parallel execution">
-<link rel="canonical" href="https://rakita.github.io/blog/blog/parallel-evm-claim/">
+<link rel="canonical" href="https://rakita.github.io/blog/blog/002-parallel-evm-claim/">
 
 
 
@@ -65,7 +65,7 @@
       "@type": "Article",
       "mainEntityOfPage": {
         "@type": "WebPage",
-        "@id": "/blog/parallel-evm-claim/"
+        "@id": "/blog/002-parallel-evm-claim/"
       },
       "headline": "Parallel EVM claim",
       "image": ,
@@ -139,13 +139,16 @@
         
         
         
+        
+        
+        
           
           
           {
             "@type": "ListItem",
             "position":  3 ,
-            "name": "Parallel Evm Claim",
-            "item": "https://rakita.github.io/blog/blog/parallel-evm-claim/"
+            "name": "002 Parallel Evm Claim",
+            "item": "https://rakita.github.io/blog/blog/002-parallel-evm-claim/"
           },
         
       
@@ -258,7 +261,7 @@
 <p>All examples start from the point that we received a DAG of transaction and the builder claims that transaction can be done in parallel. We want to execute those transactions in parallel and be sure that the claim is correct and that there are no inconsistencies (data races) that can happen.</p>
 <h3 id="example-1-simple-two-parallel-transactions">Example 1: simple two parallel transactions</h3>
 <p>We have two transactions that read/write to the <strong>same</strong> state (there is only one state that all of them share) and the update to that state is atomic. The example here is very simple but it allows us to set up some groundwork and initial ideas of what is checked.</p>
-<p><img src="https://rakita.github.io/blog/blog/parallel-evm-claim/./example_2tx.png" alt="" /></p>
+<p><img src="https://rakita.github.io/blog/blog/002-parallel-evm-claim/./example_2tx.png" alt="" /></p>
 <p><a href="https://mermaid.live/edit#pako:eNpdTrsOwjAQ-5XII2oGOmZgYmViJAyn5gqRmgSlFwSq-u8cMCDhyfJD9oKhBIbDLCS8j3SplOy999koTpuzsXZn5LH9F3p0SFwTxaDt5W17yJUTezilgUdqk3j4vGqUmpTjMw9wUht3aLfw24MbaZpV5RCl1MP30efY-gKkKDNp">Graph</a></p>
 <p>For the sake of explaining we are simplifying state and seeing it as a list of accounts, these &quot;accounts&quot; can be a balance/nonce/code hash(code)/storage slot, it is just easier to reason and think about in simpler form.</p>
 <p>Additionally, we should consider both reads and writes of accounts as the same thing. This can be explored as a follow-up but for the first iteration, it is easier to omit this distinction. So this means that the transaction touched state consists of both reads and writes that this transaction did. And with this, having an account read from two different parallel transactions is considered invalid.</p>
@@ -267,19 +270,19 @@
 <p>Running transactions in parallel is more implementation detail and will depend on the programming language.</p>
 <h3 id="example-2-chains-transactions-dependencies">Example 2: Chains, transactions dependencies.</h3>
 <p>The second example is having a third transaction that depends on the first one.</p>
-<p><img src="https://rakita.github.io/blog/blog/parallel-evm-claim/./example_chain.png" alt="" /></p>
+<p><img src="https://rakita.github.io/blog/blog/002-parallel-evm-claim/./example_chain.png" alt="" /></p>
 <p><a href="https://mermaid.live/edit#pako:eNpdjjEOwjAMRa8SeUTNQMuUgYmViZEwWI0LkZoEpU4Fqnp3DC1CwtPX-7b1JmiTIzAwMDIdPF4zBj3WNiqZ8-aitN4rfmwXIGEFzRc0K9j9n9RQQaAc0Dv5P71rC3yjQBaMREcdlp4t2DjLKhZOp2dswXAuVEG5u58RmA77QSg5zykfF-eP-vwC_v88KA">Graph</a></p>
 <p>This is the first example of dependent transactions and<code>tx3</code> can access only accounts that are in the original state or touched by <code>tx1</code>, if both <code>tx3</code> and <code>tx2</code> access the same account this would make the parallelism claim invalid.</p>
 <p>This example show's us that marking of state can be done by chain ids that this tx belongs to and we would get the same outcome. Without this <code>tx4</code> would need to check if the account state is original or marked by <code>tx1</code> or marked by <code>tx3</code> and that wouldn't be efficient. I will use the terms chain and transaction interchangeably.</p>
 <h2 id="example-3-chain-forks-and-joins">Example 3: Chain forks and joins</h2>
 <p>Modelling dependency can be tricky but in parallel execution, there are only two synchronizations that can happen. And those are forks and joins and both of them can be seen in the picture.</p>
-<p><img src="https://rakita.github.io/blog/blog/parallel-evm-claim/./example_fork_join.png" alt="" /></p>
+<p><img src="https://rakita.github.io/blog/blog/002-parallel-evm-claim/./example_fork_join.png" alt="" /></p>
 <p><a href="https://mermaid.live/edit#pako:eNpdj7EOwjAMRH-l8oiagRSWDEysTIwNg9W4EKlJUOogUNV_J9BWFXg6vTtZdwM0wRAo6BmZjhavEZ14SO2LfPXmUghxKPi5nUAWM6gWUM1g95_YL0D-gvWphBIcRYfW5AbDx9bAN3KkQWVpqMXUsQbtxxzFxOH88g0ojolKSHezdgbVYtdnSsZyiKdp1Xfc-AaEXkTp">Graph</a></p>
 <p>There is one fork here, and can be seen in the example of <code>tx1</code> that forks its state to chains of <code>tx5</code> and <code>tx3</code>. This means that there is a dependency between <code>tx5</code> and <code>tx1</code>, <code>tx3</code> and <code>tx1</code> but there are no dependencies on <code>tx3</code> and <code>tx5</code> and they can be run in parallel.</p>
 <p>The mechanism of marking the state works the same as in the first example. <code>tx5</code> can now access the account of the original or <code>tx1</code> or <code>tx2</code> accounts if it accessed the state of <code>tx3</code> or <code>tx3</code> this would make parallel claim invalid.</p>
 <h2 id="example-4-diamond-pattern">Example 4: Diamond pattern</h2>
 <p>This is a good example that tests our initial mechanism of marking of accessed state.</p>
-<p><img src="https://rakita.github.io/blog/blog/parallel-evm-claim/./example_diamont.png" alt="" /></p>
+<p><img src="https://rakita.github.io/blog/blog/002-parallel-evm-claim/./example_diamont.png" alt="" /></p>
 <p><a href="https://mermaid.live/edit#pako:eNpd0D0PgjAQBuC_Qm40MMiHJB2cXJ0crcOFHkpCKSlXoyH8d6uUmPSmy3PvcHczNEYRCJgYmU4d3i3q7JnLIfF13d2SLDsm_Nqv4JsAxQZFgDJOVBvkMZQBDhtUAeo4Ucd75JCCJquxU37p-TuWwA_SJEH4VlGLrmcJclh8FB2by3toQLB1lIIb1f9MEC32k1dSHRt7Xh_x-8fyAQIhUhg">Graph</a></p>
 <p>All previous statements should be valid here.</p>
 <p>For example <code>tx7</code> can only touch original state or <code>tx1</code>, <code>tx2</code>, <code>tx3</code>, <code>tx4</code>, <code>tx5</code> but not <code>tx6</code>, and same with <code>tx6</code> it can't touch state of <code>tx7</code></p>
