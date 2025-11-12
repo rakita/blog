@@ -1,8 +1,21 @@
++++
+title = "Ethereum should be easier to run"
+description = "It should be easy as `brew install eth` and `eth run`"
+date = 2025-11-12T12:00:00+00:00
+updated = 2025-11-12T12:00:00+00:00
+draft = false
+template = "blog/page.html"
+
+[taxonomies]
+authors = ["draganrakita"]
++++
+
+
 # Ethereum should be easier to run
 
 Running an Ethereum node is challenging. You need to understand what EL and CL are, how to set them up, and where to find them. The terminology around full nodes, history nodes, snap sync, and snapshot sync is confusing. Ethereum needs a single entry point that brings it all together in one place.
 
-We deserve better. As complexity increases, we need to build tools that remove that extra complexity and simplify the process.
+As complexity increases, new tools needs to remove that extra complexity and simplify the process.
 
 This should be as easy as:
 ```bash
@@ -117,4 +130,4 @@ Supports advanced features like MEV-Boost (`--mev-type flashbots`), multi-client
 
 ## And more (testing, keys, validations, mev-boost, rpc calls)
 
-These are a few examples to show what we have and should be expanded. We should have one binary that sets up all of this for us and orchestrates binaries.
+One binary to rule them all, that sets up all configs and orchestrates all other binaries.

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="x-ua-compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+  <link rel="preload" as="font" href="https://rakita.github.io/blog/fonts/vendor/jost/jost-v4-latin-regular.woff2" type="font/woff2" crossorigin>
+  <link rel="preload" as="font" href="https://rakita.github.io/blog/fonts/vendor/jost/jost-v4-latin-700.woff2"  type="font/woff2" crossorigin>
+
+
+<link rel="stylesheet" href="https://rakita.github.io/blog/main.css">
+
+
+
+  
+  
+  
+  
+  
+    
+  
+
+  
+  
+    
+    
+  
+  
+  
+    
+  
+  
+  
+  
+    
+  
+  
+  
+
+
+  <meta name="robots" content="index, follow">
+  <meta name="googlebot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+  <meta name="bingbot" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+
+	
+
+
+	
+
+<title>Ethereum should be easier to run | draganrakita</title>
+<meta name="description" content="It should be easy as `brew install eth` and `eth run`">
+<link rel="canonical" href="https://rakita.github.io/blog/blog/007-eth-run/">
+
+
+
+
+
+
+  
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Article",
+      "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "/blog/007-eth-run/"
+      },
+      "headline": "Ethereum should be easier to run",
+      "image": ,
+      "datePublished": "2025-11-12T12:00:00+00:00",
+      "dateModified": "2025-11-12T12:00:00+00:00",
+      "author": {
+        "@type": "Organization",
+        "name": "Ethereum should be easier to run"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "Ethereum should be easier to run",
+        
+        "logo": {
+          "@type": "ImageObject",
+          "url": "logo-doks.png"
+        }
+        
+      },
+      "description": "It should be easy as `brew install eth` and `eth run`"
+    }
+    </script>
+  
+
+
+
+
+
+<script type="application/ld+json">
+  {
+    "@context": "http://schema.org",
+    "@type": "BreadcrumbList",
+    
+      
+      
+        
+        
+        
+        
+        
+        
+        
+        
+          {
+            "@type": "ListItem",
+            "position":  1 ,
+            "name": "Home",
+            "item": "https://rakita.github.io/blog/"
+          },
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  2 ,
+            "name": "Blog",
+            "item": "https://rakita.github.io/blog/blog/"
+          },
+        
+      
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+          
+          
+          {
+            "@type": "ListItem",
+            "position":  3 ,
+            "name": "007 Eth Run",
+            "item": "https://rakita.github.io/blog/blog/007-eth-run/"
+          },
+        
+      
+    
+  }
+</script>
+
+
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TPLFNYY7E4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-TPLFNYY7E4');
+</script>
+
+
+
+
+
+
+  <meta name="theme-color" content="#fff">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://rakita.github.io/blog/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="https://rakita.github.io/blog/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="https://rakita.github.io/blog/favicon-16x16.png">
+  
+    <link rel="manifest" href="https://rakita.github.io/blog/site.webmanifest" crossorigin>
+  
+
+
+  
+
+</head>
+
+  
+
+<body class="blog single">
+  
+  
+<div class="header-bar fixed-top"></div>
+<header class="navbar fixed-top navbar-expand-md navbar-light">
+	<div class="container">
+		<input class="menu-btn order-0" type="checkbox" id="menu-btn">
+		<label class="menu-icon d-md-none" for="menu-btn"><span class="navicon"></span></label>
+		<a class="navbar-brand order-1 order-md-0 me-auto" href="https://rakita.github.io/blog/">draganrakita</a>
+		<button id="mode" class="btn btn-link order-2 order-md-4" type="button" aria-label="Toggle mode">
+			<span class="toggle-dark"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-moon"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg></span>
+			<span class="toggle-light"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-sun"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg></span>
+		</button>
+		<ul class="navbar-nav fork-me order-3 order-md-5">
+			
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://twitter.com/rakitadragan"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-twitter"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path></svg><span class="ms-2 visually-hidden">Twitter</span></a>
+					</li>
+				
+					<li class="nav-item">
+						<a class="nav-link" href="https://github.com/rakita"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg><span class="ms-2 visually-hidden">GitHub</span></a>
+					</li>
+				
+			
+		</ul>
+		<div class="collapse navbar-collapse order-4 order-md-1">
+			<ul class="navbar-nav main-nav me-auto order-5 order-md-2">
+				
+					
+				
+				
+				
+					
+						<li class="nav-item blog active">
+							<a class="nav-link" href="https://rakita.github.io/blog/blog/">Blog</a>
+						</li>
+					
+				
+			</ul>
+			<div class="break order-6 d-md-none"></div>
+			
+				<form class="navbar-form flex-grow-1 order-7 order-md-3">
+					<input id="userinput" class="form-control is-search" type="search" placeholder="Search docs..."
+						aria-label="Search docs..." autocomplete="off">
+					<div id="suggestions" class="shadow bg-white rounded"></div>
+				</form>
+			
+		</div>
+	</div>
+</header>
+
+
+
+  <div class="main">
+    
+<div class="wrap container" role="document">
+  <div class="content">
+    <div class="row justify-content-center">
+      <div class="col-md-12 col-lg-10 col-xxl-8">
+        <article>
+          <div class="blog-header">
+            <h1>Ethereum should be easier to run</h1>
+            
+<p><small>Posted November 12, 2025 by <a class="stretched-link position-relative" href="https://rakita.github.io/blog/authors/draganrakita/">draganrakita</a>&nbsp;&hyphen;&nbsp;<strong>4&nbsp;min read</strong></small><p>
+
+          </div>
+          
+          <h1 id="ethereum-should-be-easier-to-run"><a class="zola-anchor" href="#ethereum-should-be-easier-to-run" aria-label="Anchor link for: ethereum-should-be-easier-to-run">Ethereum should be easier to run</a></h1>
+<p>Running an Ethereum node is challenging. You need to understand what EL and CL are, how to set them up, and where to find them. The terminology around full nodes, history nodes, snap sync, and snapshot sync is confusing. Ethereum needs a single entry point that brings it all together in one place.</p>
+<p>As complexity increases, new tools needs to remove that extra complexity and simplify the process.</p>
+<p>This should be as easy as:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">brew</span><span> install eth
+</span><span style="color:#bf616a;">eth</span><span> run
+</span></code></pre>
+<h2 id="eth-run"><a class="zola-anchor" href="#eth-run" aria-label="Anchor link for: eth-run"><code>eth run</code></a></h2>
+<p>The <code>eth run</code> command simplifies Ethereum node setup by automatically configuring and launching both Execution Layer (EL) and Consensus Layer (CL) clients with optimal settings based on your hardware.</p>
+<p>It automatically handles genesis block initialization and supports multiple networks including mainnet, testnets (Sepolia, Holesky), and custom devnets, configuring the appropriate genesis and network parameters for each.</p>
+<p>Before starting clients, it checks system resources (CPU, disk type and size, RAM, bandwidth) and provides recommendations if any requirements aren't met. It verifies port availability, detects existing running clients, checks firewall configuration, and validates data directory permissions.</p>
+<p>The command automatically generates optimized configuration files for both EL and CL clients, setting appropriate cache sizes, database types, sync modes, and resource limits based on available hardware.</p>
+<p>When executed, <code>eth run</code> starts both clients in the background, monitors their health, displays real-time sync progress, and integrates with <code>eth status</code> for detailed feedback. It handles errors gracefully—detecting crashes, port conflicts, network issues, and sync stalls—with automatic recovery attempts and clear remediation suggestions.</p>
+<h2 id="eth-status"><a class="zola-anchor" href="#eth-status" aria-label="Anchor link for: eth-status"><code>eth status</code></a></h2>
+<p>Displays comprehensive status information about running Ethereum clients and infrastructure at a glance:</p>
+<p><strong>Client &amp; Sync Status:</strong></p>
+<ul>
+<li>EL/CL client status (running/syncing/stopped), versions, and uptime</li>
+<li>Current block number, sync progress percentage, and estimated time to full sync</li>
+<li>CL finalized epoch and head slot</li>
+</ul>
+<p><strong>Network &amp; Resources:</strong></p>
+<ul>
+<li>Connected peer count for both EL and CL</li>
+<li>Network type, chain ID, and health indicator</li>
+<li>CPU, memory, disk usage, and network bandwidth metrics</li>
+</ul>
+<p><strong>APIs &amp; Health:</strong></p>
+<ul>
+<li>RPC endpoint status and response time</li>
+<li>Overall health status with error messages and warnings</li>
+<li>Last successful block processed timestamp</li>
+</ul>
+<p>For example:</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> eth status
+</span><span>
+</span><span style="color:#bf616a;">Sync</span><span> Status:
+</span><span>  </span><span style="color:#bf616a;">EL:</span><span> Block 18,500,000 / 18,500,000 (100%) </span><span style="color:#bf616a;">✓</span><span> Fully synced
+</span><span>  </span><span style="color:#bf616a;">CL:</span><span> Epoch 250,000 / 250,000 (100%) </span><span style="color:#bf616a;">✓</span><span> Fully synced
+</span></code></pre>
+<h2 id="eth-monitor"><a class="zola-anchor" href="#eth-monitor" aria-label="Anchor link for: eth-monitor"><code>eth monitor</code></a></h2>
+<p>The <code>eth monitor</code> command sets up a comprehensive monitoring stack for your Ethereum node, automatically deploying Prometheus, Grafana, and the ethPandaOps Metrics Exporter with zero configuration. It detects running EL and CL clients, configures metrics exporters accordingly, and loads pre-configured templated dashboards that adapt to your client setup.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> eth monitor</span><span style="color:#bf616a;"> --start
+</span><span style="color:#bf616a;">[INFO]</span><span> Starting monitoring stack...
+</span><span style="color:#bf616a;">[INFO]</span><span> Prometheus starting on port 9090
+</span><span style="color:#bf616a;">[INFO]</span><span> Grafana starting on port 3000
+</span><span>
+</span><span style="color:#bf616a;">Monitoring</span><span> stack running:
+</span><span>  </span><span style="color:#bf616a;">-</span><span> Grafana:     http://localhost:3000
+</span><span>  </span><span style="color:#bf616a;">-</span><span> Prometheus:  http://localhost:9090
+</span><span>  </span><span style="color:#bf616a;">-</span><span> Metrics API: http://localhost:9091/metrics
+</span></code></pre>
+<p>The stack collects comprehensive metrics from both execution and consensus layers (block processing, sync status, network, RPC performance, validator metrics) plus system resources. It provides multiple dashboard types (overview, execution client, consensus client, network, resources) and maybe even optional AlertManager integration with email, Slack, Discord, and PagerDuty. Configuratio. The command transforms complex monitoring setup into a single command providing observability.</p>
+<h2 id="eth-dev"><a class="zola-anchor" href="#eth-dev" aria-label="Anchor link for: eth-dev"><code>eth dev</code></a></h2>
+<p>The <code>eth dev</code> command launches a local development Ethereum client (for example, Foundry Anvil), optimized for smart contract development and testing. It can fork mainnet or testnets at any block height, provides pre-funded accounts, and executes transactions instantly with configurable block times.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> eth dev</span><span style="color:#bf616a;"> --fork</span><span> mainnet</span><span style="color:#bf616a;"> --block</span><span> 18500000
+</span><span style="color:#bf616a;">[INFO]</span><span> Forking mainnet at block 18500000
+</span><span style="color:#bf616a;">[INFO]</span><span> ✓ Anvil started on http://localhost:8545
+</span></code></pre>
+<p>Supports multiple client dev modes and development environments (such as Foundry).</p>
+<h2 id="eth-docker"><a class="zola-anchor" href="#eth-docker" aria-label="Anchor link for: eth-docker"><code>eth docker</code></a></h2>
+<p>The <code>eth docker</code> command containerizes all functionality of <code>eth run</code>, <code>eth status</code>, <code>eth monitor</code>, and <code>eth infra</code> using Docker, providing consistent, isolated environments across different systems. It orchestrates multi-container setups with EL and CL clients, optional monitoring stack, and automatically generates a <code>docker-compose.yml</code> file. Data persists in Docker volumes across restarts.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> eth docker</span><span style="color:#bf616a;"> --network</span><span> mainnet</span><span style="color:#bf616a;"> --el-client</span><span> geth</span><span style="color:#bf616a;"> --cl-client</span><span> lighthouse</span><span style="color:#bf616a;"> --monitor
+</span><span style="color:#bf616a;">[INFO]</span><span> Starting containers...
+</span><span style="color:#bf616a;">[INFO]</span><span> ✓ geth container started (healthy)
+</span><span style="color:#bf616a;">[INFO]</span><span> ✓ lighthouse container started (healthy)
+</span><span>
+</span><span style="color:#bf616a;">Ethereum</span><span> node running in Docker:
+</span><span>  </span><span style="color:#bf616a;">-</span><span> EL RPC: http://localhost:8545
+</span><span>  </span><span style="color:#bf616a;">-</span><span> CL API: http://localhost:5052
+</span></code></pre>
+<h2 id="eth-kurtosis"><a class="zola-anchor" href="#eth-kurtosis" aria-label="Anchor link for: eth-kurtosis"><code>eth kurtosis</code></a></h2>
+<p>The <code>eth kurtosis</code> command leverages <a href="https://github.com/ethpandaops/ethereum-package">Kurtosis packages</a> to deploy complete Ethereum infrastructure stacks with a single command. It orchestrates multi-node networks, monitoring stacks, MEV infrastructure, and testing tools using portable, modular environments.</p>
+<pre data-lang="bash" style="background-color:#2b303b;color:#c0c5ce;" class="language-bash "><code class="language-bash" data-lang="bash"><span style="color:#bf616a;">$</span><span> eth kurtosis</span><span style="color:#bf616a;"> --network</span><span> devnet</span><span style="color:#bf616a;"> --nodes</span><span> 4</span><span style="color:#bf616a;"> --validators</span><span> 64
+</span><span style="color:#bf616a;">[INFO]</span><span> Deploying Ethereum package...
+</span><span style="color:#bf616a;">[INFO]</span><span> Starting 4 nodes with 64 validators each...
+</span><span>
+</span><span style="color:#bf616a;">Ethereum</span><span> network running:
+</span><span>  </span><span style="color:#bf616a;">-</span><span> Network: Private devnet (Chain ID: 1337)
+</span><span>  </span><span style="color:#bf616a;">-</span><span> Nodes: 4 EL/CL pairs, 256 validators
+</span><span>  </span><span style="color:#bf616a;">-</span><span> EL RPC: http://localhost:8545
+</span><span>  </span><span style="color:#bf616a;">-</span><span> Grafana: http://localhost:3000
+</span></code></pre>
+<p>Supports advanced features like MEV-Boost (<code>--mev-type flashbots</code>), multi-client diversity, PeerDAS, monitoring, and block explorers. All services are automatically networked and configured, with easy cleanup via <code>--cleanup</code>.</p>
+<h2 id="and-more-testing-keys-validations-mev-boost-rpc-calls"><a class="zola-anchor" href="#and-more-testing-keys-validations-mev-boost-rpc-calls" aria-label="Anchor link for: and-more-testing-keys-validations-mev-boost-rpc-calls">And more (testing, keys, validations, mev-boost, rpc calls)</a></h2>
+<p>One binary to rule them all, that sets up all configs and orchestrates all other binaries.</p>
+
+        </article>
+      </div>
+    </div>
+  </div>
+</div>
+
+  </div>
+
+  
+    
+<footer class="footer text-muted">
+	<div class="container">
+		<div class="row">
+			<div class="col-lg-8 order-last order-lg-first">
+				<ul class="list-inline">
+					
+						<li class="list-inline-item">Powered by <a href="https://www.getzola.org/">Zola</a>, and <a href="https://github.com/aaranxu/adidoks">AdiDoks</a></li>
+					
+				</ul>
+			</div>
+			<div class="col-lg-8 order-first order-lg-last text-lg-end">
+				<ul class="list-inline">
+					
+						
+							<li class="list-inline-item"><a href="https://rakita.github.io/blog/privacy-policy/">Privacy</a></li>
+						
+							<li class="list-inline-item"><a href="https://rakita.github.io/blog/docs/contributing/code-of-conduct/">Code of Conduct</a></li>
+						
+					
+				</ul>
+			</div>
+		</div>
+	</div>
+</footer>
+
+  
+
+  
+<script type="text/javascript" src="https://rakita.github.io/blog/js/main.js" defer></script>
+
+  <script type="text/javascript" src="https://rakita.github.io/blog/plugins/elasticlunr.min.js" defer></script>
+  <script type="text/javascript" src="https://rakita.github.io/blog/search_index.en.js" defer></script>
+  <script type="text/javascript" src="https://rakita.github.io/blog/js/search.js" defer></script>
+
+  
+</body>
+</html>
